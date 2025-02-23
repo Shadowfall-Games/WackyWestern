@@ -3,19 +3,6 @@ using UnityEngine;
 
 public class ActiveRagdoll : MonoBehaviour
 {
-    //-------------------------------------------------------------
-    //--Variables
-    //-------------------------------------------------------------
-
-    /*To do:
-     * - Уменьшить радиус вращения нижней ноги при ходьбе вперед
-     * - Более красивая ходьба вперед
-     * - Анимация ходьбы назад
-     * - Пофиксить анимацию подъема предметов
-     * - Пофиксить анимацию борьбы
-     */
-
-
     //Active Ragdoll Player parts
    public GameObject
         //
@@ -134,6 +121,7 @@ public class ActiveRagdoll : MonoBehaviour
 
     private void Update()
     {
+        //Debug.Log(_move);
         _move = _inputSystem.Player.Movement.ReadValue<Vector2>();
         _isLeftPunchButtonPressed = _inputSystem.Player.PunchLeft.ReadValue<float>() > 0.1f;
         _isRightPunchButtonPressed = _inputSystem.Player.PunchRight.ReadValue<float>() > 0.1f;
@@ -341,17 +329,19 @@ public class ActiveRagdoll : MonoBehaviour
     private void PlayerMovement()
     {
         //Move in camera direction
-        if (_move.y > 0)
+        if (_move.y > 0 || _move.x != 0 && _move.y >= 0)
         {
+            Debug.Log(1);
             _direction = _playerParts[0].transform.rotation * new Vector3(_move.x, 0.0f, _move.y);
             _direction.y = 0f;
             _playerParts[0].transform.GetComponent<Rigidbody>().linearVelocity = Vector3.Lerp(_playerParts[0].transform.GetComponent<Rigidbody>().linearVelocity, (_direction * _moveSpeed) + new Vector3(0, _playerParts[0].transform.GetComponent<Rigidbody>().linearVelocity.y, 0), 0.8f);
 
             if (_move.x != 0 || _move.y > 0 && _balanced)
             {
-                if (!_walkForward && !_moveAxisUsed)
+                if (!_walkForward)
                 {
                     _walkForward = true;
+                    _walkBackward = false;
                     _moveAxisUsed = true;
                     _isKeyDown = true;
                 }
@@ -359,10 +349,11 @@ public class ActiveRagdoll : MonoBehaviour
 
             else if (_move.x == 0 && _move.y == 0)
             {
-                if (_walkForward && _moveAxisUsed)
+                if (_walkForward)
                 {
                     _walkForward = false;
                     _moveAxisUsed = false;
+                    _walkBackward = false;
                     _isKeyDown = false;
                 }
             }
@@ -371,17 +362,18 @@ public class ActiveRagdoll : MonoBehaviour
         //Move in own direction
         else
         {
+            //fix this part
             if (_move.y != 0)
             {
-                var v3 = _playerParts[0].GetComponent<Rigidbody>().transform.forward * (_move.y * _moveSpeed);
-                v3.y = _playerParts[0].GetComponent<Rigidbody>().linearVelocity.y;
+                var v3 = _playerParts[0].GetComponent<Rigidbody>().transform.forward * _move.y * _moveSpeed +
+                _playerParts[0].GetComponent<Rigidbody>().transform.right * _move.x * _moveSpeed;
                 _playerParts[0].GetComponent<Rigidbody>().linearVelocity = v3;
             }
 
 
             if (_move.y > 0)
             {
-                if (!_walkForward && !_moveAxisUsed)
+                if (!_walkForward)
                 {
                     _walkBackward = false;
                     _walkForward = true;
@@ -408,7 +400,7 @@ public class ActiveRagdoll : MonoBehaviour
 
             else if (_move.y < 0)
             {
-                if (!_walkBackward && !_moveAxisUsed)
+                if (!_walkBackward)
                 {
                     _walkForward = false;
                     _walkBackward = true;
@@ -856,10 +848,10 @@ public class ActiveRagdoll : MonoBehaviour
 
                 if (_walkBackward)
                 {
-                    _playerParts[7].GetComponent<ConfigurableJoint>().targetRotation = new Quaternion(_playerParts[7].GetComponent<ConfigurableJoint>().targetRotation.x - 0.00f * _stepHeight, _playerParts[7].GetComponent<ConfigurableJoint>().targetRotation.y, _playerParts[7].GetComponent<ConfigurableJoint>().targetRotation.z, _playerParts[7].GetComponent<ConfigurableJoint>().targetRotation.w);
-                    _playerParts[8].GetComponent<ConfigurableJoint>().targetRotation = new Quaternion(_playerParts[8].GetComponent<ConfigurableJoint>().targetRotation.x - 0.07f * _stepHeight * 2, _playerParts[8].GetComponent<ConfigurableJoint>().targetRotation.y, _playerParts[8].GetComponent<ConfigurableJoint>().targetRotation.z, _playerParts[8].GetComponent<ConfigurableJoint>().targetRotation.w);
+                    _playerParts[7].GetComponent<ConfigurableJoint>().targetRotation = new Quaternion(_playerParts[7].GetComponent<ConfigurableJoint>().targetRotation.x - 0.07f * _stepHeight, _playerParts[7].GetComponent<ConfigurableJoint>().targetRotation.y, _playerParts[7].GetComponent<ConfigurableJoint>().targetRotation.z, _playerParts[7].GetComponent<ConfigurableJoint>().targetRotation.w);
+                    _playerParts[8].GetComponent<ConfigurableJoint>().targetRotation = new Quaternion(_playerParts[8].GetComponent<ConfigurableJoint>().targetRotation.x + 0.03f * _stepHeight * 2, _playerParts[8].GetComponent<ConfigurableJoint>().targetRotation.y, _playerParts[8].GetComponent<ConfigurableJoint>().targetRotation.z, _playerParts[8].GetComponent<ConfigurableJoint>().targetRotation.w);
 
-                    _playerParts[9].GetComponent<ConfigurableJoint>().targetRotation = new Quaternion(_playerParts[9].GetComponent<ConfigurableJoint>().targetRotation.x + 0.02f * _stepHeight / 2, _playerParts[9].GetComponent<ConfigurableJoint>().targetRotation.y, _playerParts[9].GetComponent<ConfigurableJoint>().targetRotation.z, _playerParts[9].GetComponent<ConfigurableJoint>().targetRotation.w);
+                    _playerParts[9].GetComponent<ConfigurableJoint>().targetRotation = new Quaternion(_playerParts[9].GetComponent<ConfigurableJoint>().targetRotation.x + 0.15f * _stepHeight / 2, _playerParts[9].GetComponent<ConfigurableJoint>().targetRotation.y, _playerParts[9].GetComponent<ConfigurableJoint>().targetRotation.z, _playerParts[9].GetComponent<ConfigurableJoint>().targetRotation.w);
                 }
 
 
@@ -906,10 +898,10 @@ public class ActiveRagdoll : MonoBehaviour
 
                 if (_walkBackward)
                 {
-                    _playerParts[9].GetComponent<ConfigurableJoint>().targetRotation = new Quaternion(_playerParts[9].GetComponent<ConfigurableJoint>().targetRotation.x - 0.00f * _stepHeight, _playerParts[9].GetComponent<ConfigurableJoint>().targetRotation.y, _playerParts[9].GetComponent<ConfigurableJoint>().targetRotation.z, _playerParts[9].GetComponent<ConfigurableJoint>().targetRotation.w);
-                    _playerParts[10].GetComponent<ConfigurableJoint>().targetRotation = new Quaternion(_playerParts[10].GetComponent<ConfigurableJoint>().targetRotation.x - 0.07f * _stepHeight * 2, _playerParts[10].GetComponent<ConfigurableJoint>().targetRotation.y, _playerParts[10].GetComponent<ConfigurableJoint>().targetRotation.z, _playerParts[10].GetComponent<ConfigurableJoint>().targetRotation.w);
+                    _playerParts[9].GetComponent<ConfigurableJoint>().targetRotation = new Quaternion(_playerParts[9].GetComponent<ConfigurableJoint>().targetRotation.x - 0.07f * _stepHeight, _playerParts[9].GetComponent<ConfigurableJoint>().targetRotation.y, _playerParts[9].GetComponent<ConfigurableJoint>().targetRotation.z, _playerParts[9].GetComponent<ConfigurableJoint>().targetRotation.w);
+                    _playerParts[10].GetComponent<ConfigurableJoint>().targetRotation = new Quaternion(_playerParts[10].GetComponent<ConfigurableJoint>().targetRotation.x + 0.03f * _stepHeight * 2, _playerParts[10].GetComponent<ConfigurableJoint>().targetRotation.y, _playerParts[10].GetComponent<ConfigurableJoint>().targetRotation.z, _playerParts[10].GetComponent<ConfigurableJoint>().targetRotation.w);
 
-                    _playerParts[7].GetComponent<ConfigurableJoint>().targetRotation = new Quaternion(_playerParts[7].GetComponent<ConfigurableJoint>().targetRotation.x + 0.02f * _stepHeight / 2, _playerParts[7].GetComponent<ConfigurableJoint>().targetRotation.y, _playerParts[7].GetComponent<ConfigurableJoint>().targetRotation.z, _playerParts[7].GetComponent<ConfigurableJoint>().targetRotation.w);
+                    _playerParts[7].GetComponent<ConfigurableJoint>().targetRotation = new Quaternion(_playerParts[7].GetComponent<ConfigurableJoint>().targetRotation.x + 0.15f * _stepHeight / 2, _playerParts[7].GetComponent<ConfigurableJoint>().targetRotation.y, _playerParts[7].GetComponent<ConfigurableJoint>().targetRotation.z, _playerParts[7].GetComponent<ConfigurableJoint>().targetRotation.w);
                 }
 
 

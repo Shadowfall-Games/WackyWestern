@@ -14,11 +14,11 @@ TagManager:
   - UI
   - Collider
   - NoSelfCollision
-  - 
+  - IgnoreCameraCollision
   - Arms
   - Player_1
   - Ground
-  - 
+  - Dummy
   - 
   - 
   - 
