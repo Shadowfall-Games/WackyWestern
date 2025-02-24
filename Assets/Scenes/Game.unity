@@ -7868,7 +7868,7 @@ MonoBehaviour:
   _stepHeight: 1
   _feetMountForce: 150
   _reachSensitivity: 100
-  _maxReachValue: 0.1
+  _maxReachValue: 0.3
   _minReachValue: 0.6
   _armReachStiffness: 700
   _canBeKnockoutByImpact: 1
