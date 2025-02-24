@@ -37,7 +37,7 @@ public class CameraController : MonoBehaviour
     {
         _inputSystem.Player.Disable();
     }
-    
+
     private void Start()
     {
         Cursor.lockState = CursorLockMode.Locked;
@@ -58,11 +58,11 @@ public class CameraController : MonoBehaviour
 
     private void FixedUpdate()
     {
-            _direction = new Vector3(0, 0, -_distance);
-            _rotation = Quaternion.Euler(-_currentY, _currentX, 0);
-            _camera.transform.position = Vector3.Lerp(_camera.transform.position, _objectToFollow.position + _rotation * _direction, _smoothness);
-            if (Physics.Linecast(_objectToFollow.position, _camera.transform.position, out RaycastHit hit, ~_ignoreLayer)) _camera.transform.position = hit.point + _camera.transform.forward * _distanceOffset;
-            _camera.transform.LookAt(_objectToFollow.position);
+        _direction = new Vector3(0, 0, -_distance);
+        _rotation = Quaternion.Euler(-_currentY, _currentX, 0);
+        _camera.transform.position = Vector3.Lerp(_camera.transform.position, _objectToFollow.position + _rotation * _direction, _smoothness);
+        if (Physics.Linecast(_objectToFollow.position, _camera.transform.position, out RaycastHit hit, ~_ignoreLayer)) _camera.transform.position = hit.point + _camera.transform.forward * _distanceOffset;
+        _camera.transform.LookAt(_objectToFollow.position);
     }
 
 }

@@ -1,102 +1,92 @@
 ﻿using UnityEngine;
 
 public class HandContact : MonoBehaviour
+{
+    [SerializeField] private ActiveRagdoll _player;
+
+    [SerializeField] private bool Left;
+    [SerializeField] private bool hasJoint;
+
+    private InputSystem _inputSystem;
+
+    private void OnEnable()
     {
-        public ActiveRagdoll _player;
-    
-        //Is left or right hand
-        public bool Left;
-    
-        //Have joint/grabbed
-        public bool hasJoint;
+        _inputSystem = new InputSystem();
+        _inputSystem.Player.Enable();
+    }
 
-        private InputSystem _inputSystem;
-
-       private void OnEnable()
-       {
-            _inputSystem = new InputSystem();
-            _inputSystem.Player.Enable();
-       }
-
-       private void OnDisable()
-       {
-            _inputSystem.Player.Disable();
-       }
-	
-
-        private void Update()
+    private void OnDisable()
+    {
+        _inputSystem.Player.Disable();
+    }
+    private void Update()
+    {
+        if (_player.UseConrols())
         {
-            if(_player._useControls)
+            //On input release destroy joint
+            if (Left)
             {
-                //Left Hand
-                //On input release destroy joint
-                if(Left)
+                if (hasJoint && !_inputSystem.Player.ReachLeft.IsPressed())
                 {
-                    if(hasJoint && !_inputSystem.Player.ReachLeft.IsPressed())
-                    {
-                        this.gameObject.GetComponent<FixedJoint>().breakForce = 0;
-                        hasJoint = false;
-                    }
-
-                    if(hasJoint && this.gameObject.GetComponent<FixedJoint>() == null)
-                    {
-                        hasJoint = false;
-                    }
+                    this.gameObject.GetComponent<FixedJoint>().breakForce = 0;
+                    hasJoint = false;
                 }
 
-                //Right Hand
-                //On input release destroy joint
-                if(!Left)
+                if (hasJoint && this.gameObject.GetComponent<FixedJoint>() == null)
                 {
-                    if(hasJoint && !_inputSystem.Player.ReachRight.IsPressed())
-                    {
-                        this.gameObject.GetComponent<FixedJoint>().breakForce = 0;
-                        hasJoint = false;
-                    }
+                    hasJoint = false;
+                }
+            }
 
-                    if(hasJoint && this.gameObject.GetComponent<FixedJoint>() == null)
-                    {
-                        hasJoint = false;
-                    }
+            //On input release destroy joint
+            if (!Left)
+            {
+                if (hasJoint && !_inputSystem.Player.ReachRight.IsPressed())
+                {
+                    this.gameObject.GetComponent<FixedJoint>().breakForce = 0;
+                    hasJoint = false;
+                }
+
+                if (hasJoint && this.gameObject.GetComponent<FixedJoint>() == null)
+                {
+                    hasJoint = false;
                 }
             }
         }
+    }
 
-        //Grab on collision when input is used
-        private void OnCollisionEnter(Collision col)
+    private void OnCollisionEnter(Collision col)
+    {
+        if (_player.UseConrols())
         {
-            if(_player._useControls)
+            if (Left)
             {
-                //Left Hand
-                if(Left)
+                if (col.gameObject.tag == "CanBeGrabbed" && col.gameObject.layer != _player.ThisPlayerLayer() && !hasJoint)
                 {
-                    if(col.gameObject.tag == "CanBeGrabbed" && col.gameObject.layer != LayerMask.NameToLayer(_player._thisPlayerLayer) && !hasJoint)
+                    if (_inputSystem.Player.ReachLeft.IsPressed() && !hasJoint && !_player.PunchingLeft())
                     {
-                        if(_inputSystem.Player.ReachLeft.IsPressed() && !hasJoint && !_player._punchingLeft)
-                        {
-                            hasJoint = true;
-                            this.gameObject.AddComponent<FixedJoint>();
-                            this.gameObject.GetComponent<FixedJoint>().breakForce = Mathf.Infinity;
-                            this.gameObject.GetComponent<FixedJoint>().connectedBody = col.gameObject.GetComponent<Rigidbody>();
-                        }
+                        hasJoint = true;
+                        this.gameObject.AddComponent<FixedJoint>();
+                        this.gameObject.GetComponent<FixedJoint>().breakForce = Mathf.Infinity;
+                        this.gameObject.GetComponent<FixedJoint>().connectedBody = col.gameObject.GetComponent<Rigidbody>();
                     }
-                
                 }
 
-                //Right Hand
-                if(!Left)
+            }
+
+            if (!Left)
+            {
+                if (col.gameObject.tag == "CanBeGrabbed" && col.gameObject.layer != _player.ThisPlayerLayer() && !hasJoint)
                 {
-                    if(col.gameObject.tag == "CanBeGrabbed" && col.gameObject.layer != LayerMask.NameToLayer(_player._thisPlayerLayer) && !hasJoint)
+                    if (_inputSystem.Player.ReachRight.IsPressed() && !hasJoint && !_player.PunchingRight())
                     {
-                        if(_inputSystem.Player.ReachRight.IsPressed() && !hasJoint && !_player._punchingRight)
-                        {
-                            hasJoint = true;
-                            this.gameObject.AddComponent<FixedJoint>();
-                            this.gameObject.GetComponent<FixedJoint>().breakForce = Mathf.Infinity;
-                            this.gameObject.GetComponent<FixedJoint>().connectedBody = col.gameObject.GetComponent<Rigidbody>();
-                        }
+                        hasJoint = true;
+                        this.gameObject.AddComponent<FixedJoint>();
+                        this.gameObject.GetComponent<FixedJoint>().breakForce = Mathf.Infinity;
+                        this.gameObject.GetComponent<FixedJoint>().connectedBody = col.gameObject.GetComponent<Rigidbody>();
                     }
                 }
             }
         }
     }
+}

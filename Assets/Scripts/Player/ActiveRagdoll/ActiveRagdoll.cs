@@ -3,7 +3,8 @@ using UnityEngine;
 
 public class ActiveRagdoll : MonoBehaviour
 {
-   public GameObject
+    [SerializeField]
+    private GameObject
         _root, _body, _head,
         _upperRightArm, _lowerRightArm,
         _upperLeftArm, _lowerLeftArm,
@@ -11,67 +12,67 @@ public class ActiveRagdoll : MonoBehaviour
         _upperLeftLeg, _lowerLeftLeg,
         _rightFoot, _leftFoot;
 
-    public Rigidbody _rightHand, _leftHand;
+    [SerializeField] private Rigidbody _rightHand, _leftHand;
 
-    public Transform _centerOfMass;
+    [SerializeField] private Transform _centerOfMass;
 
     [Header("Input on this player")]
-    public bool _useControls = true;
+    [SerializeField] private bool _useControls = true;
 
     [Header("The Layer Only This Player Is On")]
-    public string _thisPlayerLayer = "Player_1";
+    [SerializeField] private LayerMask _thisPlayerLayer;
 
     [Header("Movement Properties")]
-    public bool _forwardIsCameraDirection = true;
-    public float _moveSpeed = 8;
-    public float _turnSpeed = 6;
-    public float _jumpForce = 10;
+    [SerializeField] private bool _forwardIsCameraDirection = true;
+    [SerializeField] private float _moveSpeed = 8;
+    [SerializeField] private float _turnSpeed = 6;
+    [SerializeField] private float _jumpForce = 10;
 
     [Header("Balance Properties")]
-    public bool _autoGetUpWhenPossible = true;
-    public bool _useStepPrediction = true;
-    public float _balanceHeight = 3;
-    public float _balanceStrength = 7000;
-    public float _coreStrength = 1000;
-    public float _limbStrength = 450;
+    [SerializeField] private bool _autoGetUpWhenPossible = true;
+    [SerializeField] private bool _useStepPrediction = true;
+    [SerializeField] private float _balanceHeight = 3;
+    [SerializeField] private float _balanceStrength = 7000;
+    [SerializeField] private float _coreStrength = 1000;
+    [SerializeField] private float _limbStrength = 450;
 
     [Header("Walking Animation Properties")]
-    public float _stepDuration = 0.25f;
-    public float _stepHeight = 1;
-    public float _feetMountForce = 250;
+    [SerializeField] private float _stepDuration = 0.25f;
+    [SerializeField] private float _stepHeight = 1;
+    [SerializeField] private float _feetMountForce = 250;
 
     [Header("Reach Properties")]
-    public float _reachSensitivity = 25;
-    public float _armReachStiffness = 700;
+    [SerializeField] private float _reachSensitivity = 25;
+    [SerializeField] private float _maxReachValue = 0.6f;
+    [SerializeField] private float _minReachValue = 0.6f;
+    [SerializeField] private float _armReachStiffness = 700;
 
     [Header("Actions")]
-    public bool _canBeKnockoutByImpact = true;
-    public float _requiredForceToBeKO = 20f;
-    public bool _canPunch = true;
-    public float _punchForce = 15f;
+    [SerializeField] private bool _canBeKnockoutByImpact = true;
+    [SerializeField] private float _requiredForceToBeKO = 20f;
+    [SerializeField] private bool _canPunch = true;
+    [SerializeField] private float _punchForce = 15f;
 
     private float
         _timer, _stepRightTimer, _stepLeftTimer,
         _mouseYAxisArms, _mouseXAxisArms, _mouseYAxisBody;
 
-    public bool
+    private bool
         _walkForward, _walkBackward,
         _stepRight, _stepLeft, _alertLegRight,
         _alertLegLeft, _balanced = true, _gettingUp,
         _resetPose, _isRagdoll, _isKeyDown, _moveAxisUsed,
-        jumpAxisUsed, _reachLeftAxisUsed, _reachRightAxisUsed, 
+        jumpAxisUsed, _reachLeftAxisUsed, _reachRightAxisUsed,
         _isRightPunchButtonPressed, _isLeftPunchButtonPressed;
 
-    [HideInInspector]
-    public bool
+    private bool
         _jumping, _isJumping, _inAir,
         _punchingRight, _punchingLeft;
 
-    private Camera _cam;
+    private Camera _camera;
     private Vector3 _direction;
     private Vector3 _centerOfMassPoint;
 
-    //Active Ragdoll Player Parts Array
     private GameObject[] _playerParts;
 
     JointDrive
@@ -88,8 +89,7 @@ public class ActiveRagdoll : MonoBehaviour
     private InputSystem _inputSystem;
 
     [Header("Player Editor Debug Mode")]
-    //Debug
-    public bool _editorDebugMode;
+    [SerializeField] private bool _editorDebugMode;
 
     private void OnEnable()
     {
@@ -102,10 +102,7 @@ public class ActiveRagdoll : MonoBehaviour
         _inputSystem.Player.Disable();
     }
 
-    private void Awake()
-    {
-        PlayerSetup();
-    }
+    private void Awake() => PlayerSetup();
 
     private void Update()
     {
@@ -158,7 +155,7 @@ public class ActiveRagdoll : MonoBehaviour
 
     private void PlayerSetup()
     {
-        _cam = Camera.main;
+        _camera = Camera.main;
 
         //Setup joint drives
         BalanceOn = new JointDrive();
@@ -395,7 +392,7 @@ public class ActiveRagdoll : MonoBehaviour
         {
             //Camera Direction
             //Turn with camera
-            var lookPos = _cam.transform.forward;
+            var lookPos = _camera.transform.forward;
             lookPos.y = 0;
             var rotation = Quaternion.LookRotation(lookPos);
             _playerParts[0].GetComponent<ConfigurableJoint>().targetRotation = Quaternion.Slerp(_playerParts[0].GetComponent<ConfigurableJoint>().targetRotation, Quaternion.Inverse(rotation), Time.deltaTime * _turnSpeed);
@@ -486,19 +483,19 @@ public class ActiveRagdoll : MonoBehaviour
     {
         if (1 == 1)
         {
-            if (_mouseYAxisBody <= 0.4f && _mouseYAxisBody >= -0.4f)
+            if (_mouseYAxisBody <= _maxReachValue && _mouseYAxisBody >= -_minReachValue)
             {
                 _mouseYAxisBody = _mouseYAxisBody + (_inputSystem.Player.Look.ReadValue<Vector2>().y / _reachSensitivity);
             }
 
-            else if (_mouseYAxisBody > 0.4f)
+            else if (_mouseYAxisBody > -_maxReachValue)
             {
-                _mouseYAxisBody = 0.4f;
+                _mouseYAxisBody = _maxReachValue;
             }
 
-            else if (_mouseYAxisBody < -0.4f)
+            else if (_mouseYAxisBody < -_minReachValue)
             {
-                _mouseYAxisBody = -0.4f;
+                _mouseYAxisBody = -_minReachValue;
             }
 
             _playerParts[1].GetComponent<ConfigurableJoint>().targetRotation = new Quaternion(_mouseYAxisBody, 0, 0, 1);
@@ -638,7 +635,7 @@ public class ActiveRagdoll : MonoBehaviour
                 _resetPose = true;
                 _reachRightAxisUsed = false;
             }
-        } 
+        }
 
     }
 
@@ -928,7 +925,7 @@ public class ActiveRagdoll : MonoBehaviour
         _resetPose = true;
     }
 
-    void ResetPlayerPose()
+    private void ResetPlayerPose()
     {
         if (_resetPose && !_jumping)
         {
@@ -943,7 +940,7 @@ public class ActiveRagdoll : MonoBehaviour
             _resetPose = false;
         }
     }
-    void CenterOfMass()
+    private void CenterOfMass()
     {
         _centerOfMassPoint =
 
@@ -974,7 +971,19 @@ public class ActiveRagdoll : MonoBehaviour
         _centerOfMass.position = _centerOfMassPoint;
     }
 
-    void OnDrawGizmos()
+    public LayerMask ThisPlayerLayer() => _thisPlayerLayer;
+
+    public bool IsJumping() => _isJumping;
+
+    public bool InAir() => _inAir;
+
+    public bool PunchingRight() => _punchingRight;
+
+    public bool PunchingLeft() => _punchingLeft;
+
+    public bool UseConrols() => _useControls;
+
+    private void OnDrawGizmos()
     {
         if (_editorDebugMode)
         {

@@ -724,7 +724,7 @@ MonoBehaviour:
   _distanceOffset: 0.11
   _smoothness: 0.06
   _rotateSpeed: 2
-  _minAngle: -65
+  _minAngle: -60
   _maxAngle: 20
   _ignoreLayer:
     serializedVersion: 2
@@ -7851,7 +7851,9 @@ MonoBehaviour:
   _leftHand: {fileID: 4066848411096179309}
   _centerOfMass: {fileID: 760832318}
   _useControls: 1
-  _thisPlayerLayer: Player_1
+  _thisPlayerLayer:
+    serializedVersion: 2
+    m_Bits: 0
   _forwardIsCameraDirection: 1
   _moveSpeed: 8
   _turnSpeed: 6
@@ -7865,34 +7867,14 @@ MonoBehaviour:
   _stepDuration: 0.2
   _stepHeight: 1
   _feetMountForce: 150
-  _reachSensitivity: 25
+  _reachSensitivity: 100
+  _maxReachValue: 0.1
+  _minReachValue: 0.6
   _armReachStiffness: 700
   _canBeKnockoutByImpact: 1
-  _requiredForceToBeKO: 50
+  _requiredForceToBeKO: 60
   _canPunch: 1
-  _punchForce: 15
-  _walkForward: 0
-  _walkBackward: 0
-  _stepRight: 0
-  _stepLeft: 0
-  _alertLegRight: 0
-  _alertLegLeft: 0
-  _balanced: 1
-  _gettingUp: 0
-  _resetPose: 0
-  _isRagdoll: 0
-  _isKeyDown: 0
-  _moveAxisUsed: 0
-  jumpAxisUsed: 0
-  _reachLeftAxisUsed: 0
-  _reachRightAxisUsed: 0
-  _isRightPunchButtonPressed: 0
-  _isLeftPunchButtonPressed: 0
-  _jumping: 0
-  _isJumping: 0
-  _inAir: 0
-  _punchingRight: 0
-  _punchingLeft: 0
+  _punchForce: 30
   _editorDebugMode: 1
 --- !u!4 &5226274891927364878
 Transform:
