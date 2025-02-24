@@ -3,9 +3,7 @@ using UnityEngine;
 
 public class ActiveRagdoll : MonoBehaviour
 {
-    //Active Ragdoll Player parts
    public GameObject
-        //
         _root, _body, _head,
         _upperRightArm, _lowerRightArm,
         _upperLeftArm, _lowerLeftArm,
@@ -13,55 +11,45 @@ public class ActiveRagdoll : MonoBehaviour
         _upperLeftLeg, _lowerLeftLeg,
         _rightFoot, _leftFoot;
 
-    //Rigidbody Hands
     public Rigidbody _rightHand, _leftHand;
 
-    //Center of mass point
-    public Transform COMP;
+    public Transform _centerOfMass;
 
     [Header("Input on this player")]
-    //Enable controls
     public bool _useControls = true;
 
     [Header("The Layer Only This Player Is On")]
-    //Player layer name
     public string _thisPlayerLayer = "Player_1";
 
     [Header("Movement Properties")]
-    //Player properties
     public bool _forwardIsCameraDirection = true;
-    //Movement
     public float _moveSpeed = 8;
     public float _turnSpeed = 6;
     public float _jumpForce = 10;
 
     [Header("Balance Properties")]
-    //Balance
     public bool _autoGetUpWhenPossible = true;
     public bool _useStepPrediction = true;
     public float _balanceHeight = 3;
     public float _balanceStrength = 7000;
     public float _coreStrength = 1000;
     public float _limbStrength = 450;
-    //Walking
+
+    [Header("Walking Animation Properties")]
     public float _stepDuration = 0.25f;
     public float _stepHeight = 1;
     public float _feetMountForce = 250;
 
     [Header("Reach Properties")]
-    //Reach
     public float _reachSensitivity = 25;
     public float _armReachStiffness = 700;
 
     [Header("Actions")]
-    //Punch
     public bool _canBeKnockoutByImpact = true;
     public float _requiredForceToBeKO = 20f;
     public bool _canPunch = true;
     public float _punchForce = 15f;
 
-
-    //Hidden variables
     private float
         _timer, _stepRightTimer, _stepLeftTimer,
         _mouseYAxisArms, _mouseXAxisArms, _mouseYAxisBody;
@@ -121,7 +109,6 @@ public class ActiveRagdoll : MonoBehaviour
 
     private void Update()
     {
-        //Debug.Log(_move);
         _move = _inputSystem.Player.Movement.ReadValue<Vector2>();
         _isLeftPunchButtonPressed = _inputSystem.Player.PunchLeft.ReadValue<float>() > 0.1f;
         _isRightPunchButtonPressed = _inputSystem.Player.PunchRight.ReadValue<float>() > 0.1f;
@@ -286,7 +273,7 @@ public class ActiveRagdoll : MonoBehaviour
         //Check direction to walk when off balance
         //Backwards
 
-        if (COMP.position.z < _playerParts[11].transform.position.z && COMP.position.z < _playerParts[12].transform.position.z)
+        if (_centerOfMass.position.z < _playerParts[11].transform.position.z && _centerOfMass.position.z < _playerParts[12].transform.position.z)
         {
             _walkBackward = true;
         }
@@ -299,7 +286,7 @@ public class ActiveRagdoll : MonoBehaviour
         }
 
         //Forward
-        if (COMP.position.z > _playerParts[11].transform.position.z && COMP.position.z < _playerParts[12].transform.position.z)
+        if (_centerOfMass.position.z > _playerParts[11].transform.position.z && _centerOfMass.position.z < _playerParts[12].transform.position.z)
         {
             _walkForward = true;
         }
@@ -326,36 +313,50 @@ public class ActiveRagdoll : MonoBehaviour
         }
     }
 
+    private void SetDrives(JointDrive drive)
+    {
+        for (int i = 7; i <= 12; i++)
+        {
+            _playerParts[i].GetComponent<ConfigurableJoint>().angularXDrive = drive;
+            _playerParts[i].GetComponent<ConfigurableJoint>().angularYZDrive = drive;
+        }
+    }
+
+    private void SetPlayerState(bool walkForward, bool walkBackward, bool moveAxisUsed, bool isKeyDown, JointDrive drive)
+    {
+        SetPlayerState(walkForward, walkBackward, moveAxisUsed, isKeyDown);
+
+        if (_isRagdoll)
+        {
+            SetDrives(drive);
+        }
+    }
+
+    private void SetPlayerState(bool walkForward, bool walkBackward, bool moveAxisUsed, bool isKeyDown)
+    {
+        _walkForward = walkForward;
+        _walkBackward = walkBackward;
+        _moveAxisUsed = moveAxisUsed;
+        _isKeyDown = isKeyDown;
+    }
+
     private void PlayerMovement()
     {
         //Move in camera direction
         if (_move.y > 0 || _move.x != 0 && _move.y >= 0)
         {
-            Debug.Log(1);
             _direction = _playerParts[0].transform.rotation * new Vector3(_move.x, 0.0f, _move.y);
             _direction.y = 0f;
             _playerParts[0].transform.GetComponent<Rigidbody>().linearVelocity = Vector3.Lerp(_playerParts[0].transform.GetComponent<Rigidbody>().linearVelocity, (_direction * _moveSpeed) + new Vector3(0, _playerParts[0].transform.GetComponent<Rigidbody>().linearVelocity.y, 0), 0.8f);
 
             if (_move.x != 0 || _move.y > 0 && _balanced)
             {
-                if (!_walkForward)
-                {
-                    _walkForward = true;
-                    _walkBackward = false;
-                    _moveAxisUsed = true;
-                    _isKeyDown = true;
-                }
+                if (!_walkForward) SetPlayerState(true, false, true, true);
             }
 
             else if (_move.x == 0 && _move.y == 0)
             {
-                if (_walkForward)
-                {
-                    _walkForward = false;
-                    _moveAxisUsed = false;
-                    _walkBackward = false;
-                    _isKeyDown = false;
-                }
+                if (_walkForward) SetPlayerState(false, false, false, false);
             }
         }
 
@@ -373,83 +374,17 @@ public class ActiveRagdoll : MonoBehaviour
 
             if (_move.y > 0)
             {
-                if (!_walkForward)
-                {
-                    _walkBackward = false;
-                    _walkForward = true;
-                    _moveAxisUsed = true;
-                    _isKeyDown = true;
-
-                    if (_isRagdoll)
-                    {
-                        _playerParts[7].GetComponent<ConfigurableJoint>().angularXDrive = PoseOn;
-                        _playerParts[7].GetComponent<ConfigurableJoint>().angularYZDrive = PoseOn;
-                        _playerParts[8].GetComponent<ConfigurableJoint>().angularXDrive = PoseOn;
-                        _playerParts[8].GetComponent<ConfigurableJoint>().angularYZDrive = PoseOn;
-                        _playerParts[9].GetComponent<ConfigurableJoint>().angularXDrive = PoseOn;
-                        _playerParts[9].GetComponent<ConfigurableJoint>().angularYZDrive = PoseOn;
-                        _playerParts[10].GetComponent<ConfigurableJoint>().angularXDrive = PoseOn;
-                        _playerParts[10].GetComponent<ConfigurableJoint>().angularYZDrive = PoseOn;
-                        _playerParts[11].GetComponent<ConfigurableJoint>().angularXDrive = PoseOn;
-                        _playerParts[11].GetComponent<ConfigurableJoint>().angularYZDrive = PoseOn;
-                        _playerParts[12].GetComponent<ConfigurableJoint>().angularXDrive = PoseOn;
-                        _playerParts[12].GetComponent<ConfigurableJoint>().angularYZDrive = PoseOn;
-                    }
-                }
+                if (!_walkForward) SetPlayerState(true, false, true, true, PoseOn);
             }
 
             else if (_move.y < 0)
             {
-                if (!_walkBackward)
-                {
-                    _walkForward = false;
-                    _walkBackward = true;
-                    _moveAxisUsed = true;
-                    _isKeyDown = true;
-
-                    if (_isRagdoll)
-                    {
-                        _playerParts[7].GetComponent<ConfigurableJoint>().angularXDrive = PoseOn;
-                        _playerParts[7].GetComponent<ConfigurableJoint>().angularYZDrive = PoseOn;
-                        _playerParts[8].GetComponent<ConfigurableJoint>().angularXDrive = PoseOn;
-                        _playerParts[8].GetComponent<ConfigurableJoint>().angularYZDrive = PoseOn;
-                        _playerParts[9].GetComponent<ConfigurableJoint>().angularXDrive = PoseOn;
-                        _playerParts[9].GetComponent<ConfigurableJoint>().angularYZDrive = PoseOn;
-                        _playerParts[10].GetComponent<ConfigurableJoint>().angularXDrive = PoseOn;
-                        _playerParts[10].GetComponent<ConfigurableJoint>().angularYZDrive = PoseOn;
-                        _playerParts[11].GetComponent<ConfigurableJoint>().angularXDrive = PoseOn;
-                        _playerParts[11].GetComponent<ConfigurableJoint>().angularYZDrive = PoseOn;
-                        _playerParts[12].GetComponent<ConfigurableJoint>().angularXDrive = PoseOn;
-                        _playerParts[12].GetComponent<ConfigurableJoint>().angularYZDrive = PoseOn;
-                    }
-                }
+                if (!_walkBackward) SetPlayerState(false, true, true, true, PoseOn);
             }
 
             else if (_move.y == 0)
             {
-                if (_walkForward || _walkBackward && _moveAxisUsed)
-                {
-                    _walkForward = false;
-                    _walkBackward = false;
-                    _moveAxisUsed = false;
-                    _isKeyDown = false;
-
-                    if (_isRagdoll)
-                    {
-                        _playerParts[7].GetComponent<ConfigurableJoint>().angularXDrive = DriveOff;
-                        _playerParts[7].GetComponent<ConfigurableJoint>().angularYZDrive = DriveOff;
-                        _playerParts[8].GetComponent<ConfigurableJoint>().angularXDrive = DriveOff;
-                        _playerParts[8].GetComponent<ConfigurableJoint>().angularYZDrive = DriveOff;
-                        _playerParts[9].GetComponent<ConfigurableJoint>().angularXDrive = DriveOff;
-                        _playerParts[9].GetComponent<ConfigurableJoint>().angularYZDrive = DriveOff;
-                        _playerParts[10].GetComponent<ConfigurableJoint>().angularXDrive = DriveOff;
-                        _playerParts[10].GetComponent<ConfigurableJoint>().angularYZDrive = DriveOff;
-                        _playerParts[11].GetComponent<ConfigurableJoint>().angularXDrive = DriveOff;
-                        _playerParts[11].GetComponent<ConfigurableJoint>().angularYZDrive = DriveOff;
-                        _playerParts[12].GetComponent<ConfigurableJoint>().angularXDrive = DriveOff;
-                        _playerParts[12].GetComponent<ConfigurableJoint>().angularYZDrive = DriveOff;
-                    }
-                }
+                if (_walkForward || _walkBackward && _moveAxisUsed) SetPlayerState(false, false, false, false, DriveOff);
             }
         }
     }
@@ -549,7 +484,6 @@ public class ActiveRagdoll : MonoBehaviour
 
     private void PlayerReach()
     {
-        //Body Bending
         if (1 == 1)
         {
             if (_mouseYAxisBody <= 0.4f && _mouseYAxisBody >= -0.4f)
@@ -958,18 +892,7 @@ public class ActiveRagdoll : MonoBehaviour
             _playerParts[6].GetComponent<ConfigurableJoint>().angularYZDrive = DriveOff;
         }
         //legs
-        _playerParts[7].GetComponent<ConfigurableJoint>().angularXDrive = DriveOff;
-        _playerParts[7].GetComponent<ConfigurableJoint>().angularYZDrive = DriveOff;
-        _playerParts[8].GetComponent<ConfigurableJoint>().angularXDrive = DriveOff;
-        _playerParts[8].GetComponent<ConfigurableJoint>().angularYZDrive = DriveOff;
-        _playerParts[9].GetComponent<ConfigurableJoint>().angularXDrive = DriveOff;
-        _playerParts[9].GetComponent<ConfigurableJoint>().angularYZDrive = DriveOff;
-        _playerParts[10].GetComponent<ConfigurableJoint>().angularXDrive = DriveOff;
-        _playerParts[10].GetComponent<ConfigurableJoint>().angularYZDrive = DriveOff;
-        _playerParts[11].GetComponent<ConfigurableJoint>().angularXDrive = DriveOff;
-        _playerParts[11].GetComponent<ConfigurableJoint>().angularYZDrive = DriveOff;
-        _playerParts[12].GetComponent<ConfigurableJoint>().angularXDrive = DriveOff;
-        _playerParts[12].GetComponent<ConfigurableJoint>().angularYZDrive = DriveOff;
+        SetDrives(DriveOff);
     }
 
     private void DeactivateRagdoll()
@@ -1000,18 +923,7 @@ public class ActiveRagdoll : MonoBehaviour
             _playerParts[6].GetComponent<ConfigurableJoint>().angularYZDrive = PoseOn;
         }
         //legs
-        _playerParts[7].GetComponent<ConfigurableJoint>().angularXDrive = PoseOn;
-        _playerParts[7].GetComponent<ConfigurableJoint>().angularYZDrive = PoseOn;
-        _playerParts[8].GetComponent<ConfigurableJoint>().angularXDrive = PoseOn;
-        _playerParts[8].GetComponent<ConfigurableJoint>().angularYZDrive = PoseOn;
-        _playerParts[9].GetComponent<ConfigurableJoint>().angularXDrive = PoseOn;
-        _playerParts[9].GetComponent<ConfigurableJoint>().angularYZDrive = PoseOn;
-        _playerParts[10].GetComponent<ConfigurableJoint>().angularXDrive = PoseOn;
-        _playerParts[10].GetComponent<ConfigurableJoint>().angularYZDrive = PoseOn;
-        _playerParts[11].GetComponent<ConfigurableJoint>().angularXDrive = PoseOn;
-        _playerParts[11].GetComponent<ConfigurableJoint>().angularYZDrive = PoseOn;
-        _playerParts[12].GetComponent<ConfigurableJoint>().angularXDrive = PoseOn;
-        _playerParts[12].GetComponent<ConfigurableJoint>().angularYZDrive = PoseOn;
+        SetDrives(PoseOn);
 
         _resetPose = true;
     }
@@ -1031,11 +943,6 @@ public class ActiveRagdoll : MonoBehaviour
             _resetPose = false;
         }
     }
-
-
-
-    //---Calculating Center of mass point---//
-    /////////////////////////////////////////
     void CenterOfMass()
     {
         _centerOfMassPoint =
@@ -1064,7 +971,7 @@ public class ActiveRagdoll : MonoBehaviour
              _playerParts[10].GetComponent<Rigidbody>().mass + _playerParts[11].GetComponent<Rigidbody>().mass +
              _playerParts[12].GetComponent<Rigidbody>().mass);
 
-        COMP.position = _centerOfMassPoint;
+        _centerOfMass.position = _centerOfMassPoint;
     }
 
     void OnDrawGizmos()
@@ -1076,7 +983,7 @@ public class ActiveRagdoll : MonoBehaviour
             if (_useStepPrediction)
             {
                 Gizmos.color = Color.yellow;
-                Gizmos.DrawWireSphere(COMP.position, 0.3f);
+                Gizmos.DrawWireSphere(_centerOfMass.position, 0.3f);
             }
         }
     }

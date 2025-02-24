@@ -722,8 +722,8 @@ MonoBehaviour:
   _objectToFollow: {fileID: 6799824154570638785}
   _distance: 5
   _distanceOffset: 0.11
-  _smoothness: 0.07
-  _rotateSpeed: 3
+  _smoothness: 0.06
+  _rotateSpeed: 2
   _minAngle: -65
   _maxAngle: 20
   _ignoreLayer:
@@ -7849,7 +7849,7 @@ MonoBehaviour:
   _leftFoot: {fileID: 4662635447682367113}
   _rightHand: {fileID: 4471200320263775472}
   _leftHand: {fileID: 4066848411096179309}
-  COMP: {fileID: 760832318}
+  _centerOfMass: {fileID: 760832318}
   _useControls: 1
   _thisPlayerLayer: Player_1
   _forwardIsCameraDirection: 1
