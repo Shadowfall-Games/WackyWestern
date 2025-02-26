@@ -31,27 +31,27 @@ public class ActiveRagdoll : MonoBehaviour
     [Header("Balance Properties")]
     [SerializeField] private bool _autoGetUpWhenPossible = true;
     [SerializeField] private bool _useStepPrediction = true;
-    [SerializeField] private float _balanceHeight = 3;
-    [SerializeField] private float _balanceStrength = 7000;
+    [SerializeField] private float _balanceHeight = 2.5f;
+    [SerializeField] private float _balanceStrength = 5000;
     [SerializeField] private float _coreStrength = 1000;
     [SerializeField] private float _limbStrength = 450;
 
     [Header("Walking Animation Properties")]
-    [SerializeField] private float _stepDuration = 0.25f;
+    [SerializeField] private float _stepDuration = 0.2f;
     [SerializeField] private float _stepHeight = 1;
-    [SerializeField] private float _feetMountForce = 250;
+    [SerializeField] private float _feetMountForce = 150;
 
     [Header("Reach Properties")]
-    [SerializeField] private float _reachSensitivity = 25;
-    [SerializeField] private float _maxReachValue = 0.6f;
+    [SerializeField] private float _reachSensitivity = 100;
+    [SerializeField] private float _maxReachValue = 0.3f;
     [SerializeField] private float _minReachValue = 0.6f;
     [SerializeField] private float _armReachStiffness = 700;
 
     [Header("Actions")]
     [SerializeField] private bool _canBeKnockoutByImpact = true;
-    [SerializeField] private float _requiredForceToBeKO = 20f;
+    [SerializeField] private float _requiredForceToBeKO = 40;
     [SerializeField] private bool _canPunch = true;
-    [SerializeField] private float _punchForce = 15f;
+    [SerializeField] private float _punchForce = 25;
 
     private float
         _timer, _stepRightTimer, _stepLeftTimer,
@@ -649,8 +649,8 @@ public class ActiveRagdoll : MonoBehaviour
 
             //Right hand punch pull back pose
             _playerParts[1].GetComponent<ConfigurableJoint>().targetRotation = new Quaternion(-0.15f, -0.15f, 0, 1);
-            _playerParts[3].GetComponent<ConfigurableJoint>().targetRotation = new Quaternion(-0.62f, -0.51f, 0.02f, 1);
-            _playerParts[4].GetComponent<ConfigurableJoint>().targetRotation = new Quaternion(1.31f, 0.5f, -0.5f, 1);
+            _playerParts[3].GetComponent<ConfigurableJoint>().targetRotation = new Quaternion(-0.62f, 0.1f, 0.02f, 1);
+            _playerParts[4].GetComponent<ConfigurableJoint>().targetRotation = new Quaternion(1.31f, -0.5f, 0.5f, 1);
         }
 
         if (_punchingRight && !_isRightPunchButtonPressed)
@@ -687,7 +687,7 @@ public class ActiveRagdoll : MonoBehaviour
 
             //Left hand punch pull back pose
             _playerParts[1].GetComponent<ConfigurableJoint>().targetRotation = new Quaternion(-0.15f, 0.15f, 0, 1);
-            _playerParts[5].GetComponent<ConfigurableJoint>().targetRotation = new Quaternion(0.62f, -0.51f, 0.02f, 1);
+            _playerParts[5].GetComponent<ConfigurableJoint>().targetRotation = new Quaternion(0.62f, -0.1f, 0.02f, 1);
             _playerParts[6].GetComponent<ConfigurableJoint>().targetRotation = new Quaternion(-1.31f, 0.5f, 0.5f, 1);
         }
 

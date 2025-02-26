@@ -11,7 +11,8 @@ public class CameraController : MonoBehaviour
     [SerializeField] private float _smoothness = 0.07f;
 
     [Header("Rotation Properties")]
-    [SerializeField] private float _rotateSpeed = 3;
+    [SerializeField] private float _sensivityX = 2;
+    [SerializeField] private float _sensivityY = 2;
 
     [SerializeField] private float _minAngle = -65;
     [SerializeField] private float _maxAngle = 20;
@@ -49,8 +50,8 @@ public class CameraController : MonoBehaviour
 
     private void Update()
     {
-        _currentX = _currentX + _inputSystem.Player.Look.ReadValue<Vector2>().x * _rotateSpeed;
-        _currentY = _currentY + _inputSystem.Player.Look.ReadValue<Vector2>().y * _rotateSpeed;
+        _currentX = _currentX + _inputSystem.Player.Look.ReadValue<Vector2>().x * _sensivityX;
+        _currentY = _currentY + _inputSystem.Player.Look.ReadValue<Vector2>().y * _sensivityY;
 
         _currentY = Mathf.Clamp(_currentY, _minAngle, _maxAngle);
     }
