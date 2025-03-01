@@ -162,6 +162,15 @@ public partial class @InputSystem: IInputActionCollection2, IDisposable
                     ""processors"": """",
                     ""interactions"": """",
                     ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""ResetLevel"",
+                    ""type"": ""Button"",
+                    ""id"": ""4acb6718-bd66-4e52-bbfd-f3b1e4e20be4"",
+                    ""expectedControlType"": """",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
                 }
             ],
             ""bindings"": [
@@ -296,6 +305,17 @@ public partial class @InputSystem: IInputActionCollection2, IDisposable
                     ""action"": ""PunchRight"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""35b74add-ac1f-4034-8a44-50bf59f4930b"",
+                    ""path"": ""<Keyboard>/r"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""ResetLevel"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
                 }
             ]
         }
@@ -312,6 +332,7 @@ public partial class @InputSystem: IInputActionCollection2, IDisposable
         m_Player_ReachRight = m_Player.FindAction("ReachRight", throwIfNotFound: true);
         m_Player_PunchLeft = m_Player.FindAction("PunchLeft", throwIfNotFound: true);
         m_Player_PunchRight = m_Player.FindAction("PunchRight", throwIfNotFound: true);
+        m_Player_ResetLevel = m_Player.FindAction("ResetLevel", throwIfNotFound: true);
     }
 
     ~@InputSystem()
@@ -400,6 +421,7 @@ public partial class @InputSystem: IInputActionCollection2, IDisposable
     private readonly InputAction m_Player_ReachRight;
     private readonly InputAction m_Player_PunchLeft;
     private readonly InputAction m_Player_PunchRight;
+    private readonly InputAction m_Player_ResetLevel;
     /// <summary>
     /// Provides access to input actions defined in input action map "Player".
     /// </summary>
@@ -443,6 +465,10 @@ public partial class @InputSystem: IInputActionCollection2, IDisposable
         /// Provides access to the underlying input action "Player/PunchRight".
         /// </summary>
         public InputAction @PunchRight => m_Wrapper.m_Player_PunchRight;
+        /// <summary>
+        /// Provides access to the underlying input action "Player/ResetLevel".
+        /// </summary>
+        public InputAction @ResetLevel => m_Wrapper.m_Player_ResetLevel;
         /// <summary>
         /// Provides access to the underlying input action map instance.
         /// </summary>
@@ -493,6 +519,9 @@ public partial class @InputSystem: IInputActionCollection2, IDisposable
             @PunchRight.started += instance.OnPunchRight;
             @PunchRight.performed += instance.OnPunchRight;
             @PunchRight.canceled += instance.OnPunchRight;
+            @ResetLevel.started += instance.OnResetLevel;
+            @ResetLevel.performed += instance.OnResetLevel;
+            @ResetLevel.canceled += instance.OnResetLevel;
         }
 
         /// <summary>
@@ -528,6 +557,9 @@ public partial class @InputSystem: IInputActionCollection2, IDisposable
             @PunchRight.started -= instance.OnPunchRight;
             @PunchRight.performed -= instance.OnPunchRight;
             @PunchRight.canceled -= instance.OnPunchRight;
+            @ResetLevel.started -= instance.OnResetLevel;
+            @ResetLevel.performed -= instance.OnResetLevel;
+            @ResetLevel.canceled -= instance.OnResetLevel;
         }
 
         /// <summary>
@@ -624,5 +656,12 @@ public partial class @InputSystem: IInputActionCollection2, IDisposable
         /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
         /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
         void OnPunchRight(InputAction.CallbackContext context);
+        /// <summary>
+        /// Method invoked when associated input action "ResetLevel" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
+        /// </summary>
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.started" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
+        void OnResetLevel(InputAction.CallbackContext context);
     }
 }

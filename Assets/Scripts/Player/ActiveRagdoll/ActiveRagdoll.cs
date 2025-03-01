@@ -157,7 +157,6 @@ public class ActiveRagdoll : MonoBehaviour
     {
         _camera = Camera.main;
 
-        //Setup joint drives
         BalanceOn = new JointDrive();
         BalanceOn.positionSpring = _balanceStrength;
         BalanceOn.positionDamper = 0;
@@ -183,7 +182,6 @@ public class ActiveRagdoll : MonoBehaviour
         DriveOff.positionDamper = 0;
         DriveOff.maximumForce = Mathf.Infinity;
 
-        //Setup/reroute active ragdoll parts to array
         _playerParts = new GameObject[]
         {
 				//array index numbers
@@ -203,7 +201,6 @@ public class ActiveRagdoll : MonoBehaviour
 				_leftFoot //12
         };
 
-        //Setup original pose for joint drives
         BodyTarget = _playerParts[1].GetComponent<ConfigurableJoint>().targetRotation;
         HeadTarget = _playerParts[2].GetComponent<ConfigurableJoint>().targetRotation;
         UpperRightArmTarget = _playerParts[3].GetComponent<ConfigurableJoint>().targetRotation;
@@ -973,6 +970,8 @@ public class ActiveRagdoll : MonoBehaviour
 
     public LayerMask ThisPlayerLayer() => _thisPlayerLayer;
 
+    public float RequiredForceToBeKO() => _requiredForceToBeKO;
+
     public bool IsJumping() => _isJumping;
 
     public bool InAir() => _inAir;
@@ -982,6 +981,8 @@ public class ActiveRagdoll : MonoBehaviour
     public bool PunchingLeft() => _punchingLeft;
 
     public bool UseConrols() => _useControls;
+
+    public bool CanBeKnockoutByImpact() => _canBeKnockoutByImpact;
 
     private void OnDrawGizmos()
     {
