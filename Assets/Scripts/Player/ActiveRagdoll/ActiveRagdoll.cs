@@ -110,6 +110,22 @@ public class ActiveRagdoll : MonoBehaviour
         _isLeftPunchButtonPressed = _inputSystem.Player.PunchLeft.ReadValue<float>() > 0.1f;
         _isRightPunchButtonPressed = _inputSystem.Player.PunchRight.ReadValue<float>() > 0.1f;
 
+        if (_balanced && _useStepPrediction)
+        {
+            StepPrediction();
+            CenterOfMass();
+        }
+
+        if (!_useStepPrediction)
+        {
+            ResetWalkCycle();
+        }
+    }
+
+    void FixedUpdate()
+    {
+        Walking();
+
         if (_useControls && !_inAir)
         {
             PlayerMovement();
@@ -125,25 +141,6 @@ public class ActiveRagdoll : MonoBehaviour
             PlayerReach();
         }
 
-        if (_balanced && _useStepPrediction)
-        {
-            StepPrediction();
-            CenterOfMass();
-        }
-
-        if (!_useStepPrediction)
-        {
-            ResetWalkCycle();
-        }
-
-        GroundCheck();
-        CenterOfMass();
-    }
-
-    void FixedUpdate()
-    {
-        Walking();
-
         if (_useControls)
         {
             PlayerRotation();
@@ -151,36 +148,20 @@ public class ActiveRagdoll : MonoBehaviour
 
             PlayerGetUpJumping();
         }
+
+        GroundCheck();
+        CenterOfMass();
     }
 
     private void PlayerSetup()
     {
         _camera = Camera.main;
 
-        BalanceOn = new JointDrive();
-        BalanceOn.positionSpring = _balanceStrength;
-        BalanceOn.positionDamper = 0;
-        BalanceOn.maximumForce = Mathf.Infinity;
-
-        PoseOn = new JointDrive();
-        PoseOn.positionSpring = _limbStrength;
-        PoseOn.positionDamper = 0;
-        PoseOn.maximumForce = Mathf.Infinity;
-
-        CoreStiffness = new JointDrive();
-        CoreStiffness.positionSpring = _coreStrength;
-        CoreStiffness.positionDamper = 0;
-        CoreStiffness.maximumForce = Mathf.Infinity;
-
-        ReachStiffness = new JointDrive();
-        ReachStiffness.positionSpring = _armReachStiffness;
-        ReachStiffness.positionDamper = 0;
-        ReachStiffness.maximumForce = Mathf.Infinity;
-
-        DriveOff = new JointDrive();
-        DriveOff.positionSpring = 25;
-        DriveOff.positionDamper = 0;
-        DriveOff.maximumForce = Mathf.Infinity;
+        SetupDrive(BalanceOn, _balanceStrength);
+        SetupDrive(PoseOn, _limbStrength);
+        SetupDrive(CoreStiffness, _coreStrength);
+        SetupDrive(ReachStiffness, _armReachStiffness);
+        SetupDrive(DriveOff, 25);
 
         _playerParts = new GameObject[]
         {
@@ -211,6 +192,14 @@ public class ActiveRagdoll : MonoBehaviour
         LowerRightLegTarget = _playerParts[8].GetComponent<ConfigurableJoint>().targetRotation;
         UpperLeftLegTarget = _playerParts[9].GetComponent<ConfigurableJoint>().targetRotation;
         LowerLeftLegTarget = _playerParts[10].GetComponent<ConfigurableJoint>().targetRotation;
+    }
+
+    private void SetupDrive(JointDrive jointDrive, float strength)
+    {
+        jointDrive = new JointDrive();
+        jointDrive.positionSpring = strength;
+        jointDrive.positionDamper = 0;
+        jointDrive.maximumForce = Mathf.Infinity;
     }
 
     private void GroundCheck()
@@ -305,33 +294,6 @@ public class ActiveRagdoll : MonoBehaviour
             _alertLegRight = false;
             _alertLegLeft = false;
         }
-    }
-
-    private void SetDrives(JointDrive drive)
-    {
-        for (int i = 7; i <= 12; i++)
-        {
-            _playerParts[i].GetComponent<ConfigurableJoint>().angularXDrive = drive;
-            _playerParts[i].GetComponent<ConfigurableJoint>().angularYZDrive = drive;
-        }
-    }
-
-    private void SetPlayerState(bool walkForward, bool walkBackward, bool moveAxisUsed, bool isKeyDown, JointDrive drive)
-    {
-        SetPlayerState(walkForward, walkBackward, moveAxisUsed, isKeyDown);
-
-        if (_isRagdoll)
-        {
-            SetDrives(drive);
-        }
-    }
-
-    private void SetPlayerState(bool walkForward, bool walkBackward, bool moveAxisUsed, bool isKeyDown)
-    {
-        _walkForward = walkForward;
-        _walkBackward = walkBackward;
-        _moveAxisUsed = moveAxisUsed;
-        _isKeyDown = isKeyDown;
     }
 
     private void PlayerMovement()
@@ -506,10 +468,7 @@ public class ActiveRagdoll : MonoBehaviour
             if (!_reachLeftAxisUsed)
             {
                 //Adjust Left Arm joint strength
-                _playerParts[5].GetComponent<ConfigurableJoint>().angularXDrive = ReachStiffness;
-                _playerParts[5].GetComponent<ConfigurableJoint>().angularYZDrive = ReachStiffness;
-                _playerParts[6].GetComponent<ConfigurableJoint>().angularXDrive = ReachStiffness;
-                _playerParts[6].GetComponent<ConfigurableJoint>().angularYZDrive = ReachStiffness;
+                SetDrives(ReachStiffness, 5, 6);
 
                 //Adjust body joint strength
                 _playerParts[1].GetComponent<ConfigurableJoint>().angularXDrive = CoreStiffness;
@@ -543,10 +502,7 @@ public class ActiveRagdoll : MonoBehaviour
             {
                 if (_balanced)
                 {
-                    _playerParts[5].GetComponent<ConfigurableJoint>().angularXDrive = PoseOn;
-                    _playerParts[5].GetComponent<ConfigurableJoint>().angularYZDrive = PoseOn;
-                    _playerParts[6].GetComponent<ConfigurableJoint>().angularXDrive = PoseOn;
-                    _playerParts[6].GetComponent<ConfigurableJoint>().angularYZDrive = PoseOn;
+                    SetDrives(PoseOn, 5, 6);
 
                     _playerParts[1].GetComponent<ConfigurableJoint>().angularXDrive = PoseOn;
                     _playerParts[1].GetComponent<ConfigurableJoint>().angularYZDrive = PoseOn;
@@ -554,10 +510,7 @@ public class ActiveRagdoll : MonoBehaviour
 
                 else if (!_balanced)
                 {
-                    _playerParts[5].GetComponent<ConfigurableJoint>().angularXDrive = DriveOff;
-                    _playerParts[5].GetComponent<ConfigurableJoint>().angularYZDrive = DriveOff;
-                    _playerParts[6].GetComponent<ConfigurableJoint>().angularXDrive = DriveOff;
-                    _playerParts[6].GetComponent<ConfigurableJoint>().angularYZDrive = DriveOff;
+                    SetDrives(DriveOff, 5, 6);
                 }
 
                 _resetPose = true;
@@ -575,10 +528,7 @@ public class ActiveRagdoll : MonoBehaviour
             if (!_reachRightAxisUsed)
             {
                 //Adjust Right Arm joint strength
-                _playerParts[3].GetComponent<ConfigurableJoint>().angularXDrive = ReachStiffness;
-                _playerParts[3].GetComponent<ConfigurableJoint>().angularYZDrive = ReachStiffness;
-                _playerParts[4].GetComponent<ConfigurableJoint>().angularXDrive = ReachStiffness;
-                _playerParts[4].GetComponent<ConfigurableJoint>().angularYZDrive = ReachStiffness;
+                SetDrives(ReachStiffness, 3, 4);
 
                 //Adjust body joint strength
                 _playerParts[1].GetComponent<ConfigurableJoint>().angularXDrive = CoreStiffness;
@@ -612,10 +562,7 @@ public class ActiveRagdoll : MonoBehaviour
             {
                 if (_balanced)
                 {
-                    _playerParts[3].GetComponent<ConfigurableJoint>().angularXDrive = PoseOn;
-                    _playerParts[3].GetComponent<ConfigurableJoint>().angularYZDrive = PoseOn;
-                    _playerParts[4].GetComponent<ConfigurableJoint>().angularXDrive = PoseOn;
-                    _playerParts[4].GetComponent<ConfigurableJoint>().angularYZDrive = PoseOn;
+                    SetDrives(PoseOn, 3, 4);
 
                     _playerParts[1].GetComponent<ConfigurableJoint>().angularXDrive = PoseOn;
                     _playerParts[1].GetComponent<ConfigurableJoint>().angularYZDrive = PoseOn;
@@ -623,10 +570,7 @@ public class ActiveRagdoll : MonoBehaviour
 
                 else if (!_balanced)
                 {
-                    _playerParts[3].GetComponent<ConfigurableJoint>().angularXDrive = DriveOff;
-                    _playerParts[3].GetComponent<ConfigurableJoint>().angularYZDrive = DriveOff;
-                    _playerParts[4].GetComponent<ConfigurableJoint>().angularXDrive = DriveOff;
-                    _playerParts[4].GetComponent<ConfigurableJoint>().angularYZDrive = DriveOff;
+                    SetDrives(DriveOff, 3, 4);
                 }
 
                 _resetPose = true;
@@ -634,6 +578,33 @@ public class ActiveRagdoll : MonoBehaviour
             }
         }
 
+    }
+
+    private void SetDrives(JointDrive drive, int fromValue, int toValue)
+    {
+        for (int i = fromValue; i <= toValue; i++)
+        {
+            _playerParts[i].GetComponent<ConfigurableJoint>().angularXDrive = drive;
+            _playerParts[i].GetComponent<ConfigurableJoint>().angularYZDrive = drive;
+        }
+    }
+
+    private void SetPlayerState(bool walkForward, bool walkBackward, bool moveAxisUsed, bool isKeyDown, JointDrive drive)
+    {
+        SetPlayerState(walkForward, walkBackward, moveAxisUsed, isKeyDown);
+
+        if (_isRagdoll)
+        {
+            SetDrives(drive, 7, 12);
+        }
+    }
+
+    private void SetPlayerState(bool walkForward, bool walkBackward, bool moveAxisUsed, bool isKeyDown)
+    {
+        _walkForward = walkForward;
+        _walkBackward = walkBackward;
+        _moveAxisUsed = moveAxisUsed;
+        _isKeyDown = isKeyDown;
     }
 
     private void PlayerPunch()
@@ -872,21 +843,15 @@ public class ActiveRagdoll : MonoBehaviour
         //arms
         if (!_reachRightAxisUsed)
         {
-            _playerParts[3].GetComponent<ConfigurableJoint>().angularXDrive = DriveOff;
-            _playerParts[3].GetComponent<ConfigurableJoint>().angularYZDrive = DriveOff;
-            _playerParts[4].GetComponent<ConfigurableJoint>().angularXDrive = DriveOff;
-            _playerParts[4].GetComponent<ConfigurableJoint>().angularYZDrive = DriveOff;
+            SetDrives(DriveOff, 3, 4);
         }
 
         if (!_reachLeftAxisUsed)
         {
-            _playerParts[5].GetComponent<ConfigurableJoint>().angularXDrive = DriveOff;
-            _playerParts[5].GetComponent<ConfigurableJoint>().angularYZDrive = DriveOff;
-            _playerParts[6].GetComponent<ConfigurableJoint>().angularXDrive = DriveOff;
-            _playerParts[6].GetComponent<ConfigurableJoint>().angularYZDrive = DriveOff;
+            SetDrives(DriveOff, 5, 6);
         }
         //legs
-        SetDrives(DriveOff);
+        SetDrives(DriveOff, 7, 12);
     }
 
     private void DeactivateRagdoll()
@@ -903,21 +868,15 @@ public class ActiveRagdoll : MonoBehaviour
         //arms
         if (!_reachRightAxisUsed)
         {
-            _playerParts[3].GetComponent<ConfigurableJoint>().angularXDrive = PoseOn;
-            _playerParts[3].GetComponent<ConfigurableJoint>().angularYZDrive = PoseOn;
-            _playerParts[4].GetComponent<ConfigurableJoint>().angularXDrive = PoseOn;
-            _playerParts[4].GetComponent<ConfigurableJoint>().angularYZDrive = PoseOn;
+            SetDrives(PoseOn, 3, 4);
         }
 
         if (!_reachLeftAxisUsed)
         {
-            _playerParts[5].GetComponent<ConfigurableJoint>().angularXDrive = PoseOn;
-            _playerParts[5].GetComponent<ConfigurableJoint>().angularYZDrive = PoseOn;
-            _playerParts[6].GetComponent<ConfigurableJoint>().angularXDrive = PoseOn;
-            _playerParts[6].GetComponent<ConfigurableJoint>().angularYZDrive = PoseOn;
+            SetDrives(PoseOn, 5, 6);
         }
         //legs
-        SetDrives(PoseOn);
+        SetDrives(PoseOn, 7, 12);
 
         _resetPose = true;
     }
@@ -937,33 +896,17 @@ public class ActiveRagdoll : MonoBehaviour
             _resetPose = false;
         }
     }
+
     private void CenterOfMass()
     {
-        _centerOfMassPoint =
-
-            (_playerParts[0].GetComponent<Rigidbody>().mass * _playerParts[0].transform.position +
-             _playerParts[1].GetComponent<Rigidbody>().mass * _playerParts[1].transform.position +
-             _playerParts[2].GetComponent<Rigidbody>().mass * _playerParts[2].transform.position +
-             _playerParts[3].GetComponent<Rigidbody>().mass * _playerParts[3].transform.position +
-             _playerParts[4].GetComponent<Rigidbody>().mass * _playerParts[4].transform.position +
-             _playerParts[5].GetComponent<Rigidbody>().mass * _playerParts[5].transform.position +
-             _playerParts[6].GetComponent<Rigidbody>().mass * _playerParts[6].transform.position +
-             _playerParts[7].GetComponent<Rigidbody>().mass * _playerParts[7].transform.position +
-             _playerParts[8].GetComponent<Rigidbody>().mass * _playerParts[8].transform.position +
-             _playerParts[9].GetComponent<Rigidbody>().mass * _playerParts[9].transform.position +
-             _playerParts[10].GetComponent<Rigidbody>().mass * _playerParts[10].transform.position +
-             _playerParts[11].GetComponent<Rigidbody>().mass * _playerParts[11].transform.position +
-             _playerParts[12].GetComponent<Rigidbody>().mass * _playerParts[12].transform.position)
-
-            /
-
-            (_playerParts[0].GetComponent<Rigidbody>().mass + _playerParts[1].GetComponent<Rigidbody>().mass +
-             _playerParts[2].GetComponent<Rigidbody>().mass + _playerParts[3].GetComponent<Rigidbody>().mass +
-             _playerParts[4].GetComponent<Rigidbody>().mass + _playerParts[5].GetComponent<Rigidbody>().mass +
-             _playerParts[6].GetComponent<Rigidbody>().mass + _playerParts[7].GetComponent<Rigidbody>().mass +
-             _playerParts[8].GetComponent<Rigidbody>().mass + _playerParts[9].GetComponent<Rigidbody>().mass +
-             _playerParts[10].GetComponent<Rigidbody>().mass + _playerParts[11].GetComponent<Rigidbody>().mass +
-             _playerParts[12].GetComponent<Rigidbody>().mass);
+        var finalPosition = Vector3.zero;
+        var finalMass = 0f;
+        for (int i = 0; i <= 12; i++)
+        {
+            finalPosition += _playerParts[i].GetComponent<Rigidbody>().mass * _playerParts[i].transform.position;
+            finalMass += _playerParts[i].GetComponent<Rigidbody>().mass;
+        }
+        _centerOfMassPoint = finalPosition / finalMass;
 
         _centerOfMass.position = _centerOfMassPoint;
     }
