@@ -212,20 +212,14 @@ public class ActiveRagdoll : MonoBehaviour
         {
             if (!_balanced && _playerParts[0].GetComponent<Rigidbody>().linearVelocity.magnitude < 1f)
             {
-                if (_autoGetUpWhenPossible)
-                {
-                    _balanced = true;
-                }
+                if (_autoGetUpWhenPossible) _balanced = true;
             }
         }
 
         //Fall over when ground is not detected
         else if (!Physics.Raycast(ray, out hit, _balanceHeight, 1 << LayerMask.NameToLayer("Ground")))
         {
-            if (_balanced)
-            {
-                _balanced = false;
-            }
+            if (_balanced) _balanced = false;
         }
 
 
@@ -256,29 +250,17 @@ public class ActiveRagdoll : MonoBehaviour
         //Check direction to walk when off balance
         //Backwards
 
-        if (_centerOfMass.position.z < _playerParts[11].transform.position.z && _centerOfMass.position.z < _playerParts[12].transform.position.z)
-        {
-            _walkBackward = true;
-        }
+        if (_centerOfMass.position.z < _playerParts[11].transform.position.z && _centerOfMass.position.z < _playerParts[12].transform.position.z) _walkBackward = true;
         else
         {
-            if (!_isKeyDown)
-            {
-                _walkBackward = false;
-            }
+            if (!_isKeyDown) _walkBackward = false;
         }
 
         //Forward
-        if (_centerOfMass.position.z > _playerParts[11].transform.position.z && _centerOfMass.position.z < _playerParts[12].transform.position.z)
-        {
-            _walkForward = true;
-        }
+        if (_centerOfMass.position.z > _playerParts[11].transform.position.z && _centerOfMass.position.z < _playerParts[12].transform.position.z) _walkForward = true;
         else
         {
-            if (!_isKeyDown)
-            {
-                _walkForward = false;
-            }
+            if (!_isKeyDown) _walkForward = false;
         }
     }
 
@@ -385,10 +367,7 @@ public class ActiveRagdoll : MonoBehaviour
         {
             if (!jumpAxisUsed)
             {
-                if (_balanced && !_inAir)
-                {
-                    _jumping = true;
-                }
+                if (_balanced && !_inAir) _jumping = true;
 
                 else if (!_balanced)
                 {
@@ -399,11 +378,7 @@ public class ActiveRagdoll : MonoBehaviour
             jumpAxisUsed = true;
         }
 
-        else
-        {
-            jumpAxisUsed = false;
-        }
-
+        else jumpAxisUsed = false;
 
         if (_jumping)
         {
@@ -442,20 +417,11 @@ public class ActiveRagdoll : MonoBehaviour
     {
         if (1 == 1)
         {
-            if (_mouseYAxisBody <= _maxReachValue && _mouseYAxisBody >= -_minReachValue)
-            {
-                _mouseYAxisBody = _mouseYAxisBody + (_inputSystem.Player.Look.ReadValue<Vector2>().y / _reachSensitivity);
-            }
+            if (_mouseYAxisBody <= _maxReachValue && _mouseYAxisBody >= -_minReachValue) _mouseYAxisBody = _mouseYAxisBody + (_inputSystem.Player.Look.ReadValue<Vector2>().y / _reachSensitivity);
 
-            else if (_mouseYAxisBody > -_maxReachValue)
-            {
-                _mouseYAxisBody = _maxReachValue;
-            }
+            else if (_mouseYAxisBody > -_maxReachValue) _mouseYAxisBody = _maxReachValue;
 
-            else if (_mouseYAxisBody < -_minReachValue)
-            {
-                _mouseYAxisBody = -_minReachValue;
-            }
+            else if (_mouseYAxisBody < -_minReachValue) _mouseYAxisBody = -_minReachValue;
 
             _playerParts[1].GetComponent<ConfigurableJoint>().targetRotation = new Quaternion(_mouseYAxisBody, 0, 0, 1);
         }
@@ -477,20 +443,11 @@ public class ActiveRagdoll : MonoBehaviour
                 _reachLeftAxisUsed = true;
             }
 
-            if (_mouseYAxisArms <= 1.2f && _mouseYAxisArms >= -1.2f)
-            {
-                _mouseYAxisArms = _mouseYAxisArms + (_inputSystem.Player.Look.ReadValue<Vector2>().y / _reachSensitivity);
-            }
+            if (_mouseYAxisArms <= 1.2f && _mouseYAxisArms >= -1.2f) _mouseYAxisArms = _mouseYAxisArms + (_inputSystem.Player.Look.ReadValue<Vector2>().y / _reachSensitivity);
 
-            else if (_mouseYAxisArms > 1.2f)
-            {
-                _mouseYAxisArms = 1.2f;
-            }
+            else if (_mouseYAxisArms > 1.2f) _mouseYAxisArms = 1.2f;
 
-            else if (_mouseYAxisArms < -1.2f)
-            {
-                _mouseYAxisArms = -1.2f;
-            }
+            else if (_mouseYAxisArms < -1.2f) _mouseYAxisArms = -1.2f;
 
             //upper  left arm pose
             _playerParts[5].GetComponent<ConfigurableJoint>().targetRotation = new Quaternion(-0.58f - (_mouseYAxisArms), -0.88f - (_mouseYAxisArms), -0.8f, 1);
@@ -508,18 +465,12 @@ public class ActiveRagdoll : MonoBehaviour
                     _playerParts[1].GetComponent<ConfigurableJoint>().angularYZDrive = PoseOn;
                 }
 
-                else if (!_balanced)
-                {
-                    SetDrives(DriveOff, 5, 6);
-                }
+                else if (!_balanced) SetDrives(DriveOff, 5, 6);
 
                 _resetPose = true;
                 _reachLeftAxisUsed = false;
             }
         }
-
-
-
 
         //Reach Right
         if (_inputSystem.Player.ReachRight.IsPressed() && !_punchingRight)
@@ -537,20 +488,11 @@ public class ActiveRagdoll : MonoBehaviour
                 _reachRightAxisUsed = true;
             }
 
-            if (_mouseYAxisArms <= 1.2f && _mouseYAxisArms >= -1.2f)
-            {
-                _mouseYAxisArms = _mouseYAxisArms + (_inputSystem.Player.Look.ReadValue<Vector2>().y / _reachSensitivity);
-            }
+            if (_mouseYAxisArms <= 1.2f && _mouseYAxisArms >= -1.2f) _mouseYAxisArms = _mouseYAxisArms + (_inputSystem.Player.Look.ReadValue<Vector2>().y / _reachSensitivity);
 
-            else if (_mouseYAxisArms > 1.2f)
-            {
-                _mouseYAxisArms = 1.2f;
-            }
+            else if (_mouseYAxisArms > 1.2f) _mouseYAxisArms = 1.2f;
 
-            else if (_mouseYAxisArms < -1.2f)
-            {
-                _mouseYAxisArms = -1.2f;
-            }
+            else if (_mouseYAxisArms < -1.2f) _mouseYAxisArms = -1.2f;
 
             //upper right arm pose
             _playerParts[3].GetComponent<ConfigurableJoint>().targetRotation = new Quaternion(0.58f + (_mouseYAxisArms), 0.88f + (_mouseYAxisArms), -0.8f, 1);
@@ -568,10 +510,7 @@ public class ActiveRagdoll : MonoBehaviour
                     _playerParts[1].GetComponent<ConfigurableJoint>().angularYZDrive = PoseOn;
                 }
 
-                else if (!_balanced)
-                {
-                    SetDrives(DriveOff, 3, 4);
-                }
+                else if (!_balanced) SetDrives(DriveOff, 3, 4);
 
                 _resetPose = true;
                 _reachRightAxisUsed = false;
@@ -593,10 +532,7 @@ public class ActiveRagdoll : MonoBehaviour
     {
         SetPlayerState(walkForward, walkBackward, moveAxisUsed, isKeyDown);
 
-        if (_isRagdoll)
-        {
-            SetDrives(drive, 7, 12);
-        }
+        if (_isRagdoll) SetDrives(drive, 7, 12);
     }
 
     private void SetPlayerState(bool walkForward, bool walkBackward, bool moveAxisUsed, bool isKeyDown)
@@ -609,7 +545,6 @@ public class ActiveRagdoll : MonoBehaviour
 
     private void PlayerPunch()
     {
-
         //punch right
         if (!_punchingRight && _isRightPunchButtonPressed)
         {
@@ -760,10 +695,7 @@ public class ActiveRagdoll : MonoBehaviour
                     _stepRightTimer = 0;
                     _stepRight = false;
 
-                    if (_walkForward || _walkBackward)
-                    {
-                        _stepLeft = true;
-                    }
+                    if (_walkForward || _walkBackward) _stepLeft = true;
                 }
             }
             else
@@ -810,10 +742,7 @@ public class ActiveRagdoll : MonoBehaviour
                     _stepLeftTimer = 0;
                     _stepLeft = false;
 
-                    if (_walkForward || _walkBackward)
-                    {
-                        _stepRight = true;
-                    }
+                    if (_walkForward || _walkBackward) _stepRight = true;
                 }
             }
             else
@@ -841,15 +770,8 @@ public class ActiveRagdoll : MonoBehaviour
         _playerParts[2].GetComponent<ConfigurableJoint>().angularXDrive = DriveOff;
         _playerParts[2].GetComponent<ConfigurableJoint>().angularYZDrive = DriveOff;
         //arms
-        if (!_reachRightAxisUsed)
-        {
-            SetDrives(DriveOff, 3, 4);
-        }
-
-        if (!_reachLeftAxisUsed)
-        {
-            SetDrives(DriveOff, 5, 6);
-        }
+        if (!_reachRightAxisUsed) SetDrives(DriveOff, 3, 4);
+        if (!_reachLeftAxisUsed) SetDrives(DriveOff, 5, 6);
         //legs
         SetDrives(DriveOff, 7, 12);
     }
@@ -866,15 +788,8 @@ public class ActiveRagdoll : MonoBehaviour
         _playerParts[2].GetComponent<ConfigurableJoint>().angularXDrive = PoseOn;
         _playerParts[2].GetComponent<ConfigurableJoint>().angularYZDrive = PoseOn;
         //arms
-        if (!_reachRightAxisUsed)
-        {
-            SetDrives(PoseOn, 3, 4);
-        }
-
-        if (!_reachLeftAxisUsed)
-        {
-            SetDrives(PoseOn, 5, 6);
-        }
+        if (!_reachRightAxisUsed) SetDrives(PoseOn, 3, 4);
+        if (!_reachLeftAxisUsed) SetDrives(PoseOn, 5, 6);
         //legs
         SetDrives(PoseOn, 7, 12);
 
