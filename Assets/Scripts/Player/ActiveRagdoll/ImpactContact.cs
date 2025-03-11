@@ -1,11 +1,14 @@
 ﻿using UnityEngine;
 
-public class ImpactContact : MonoBehaviour
+namespace Player.ActiveRagdoll
 {
-    [SerializeField] private ActiveRagdoll _activeRagdoll;
-
-    private void OnCollisionEnter(Collision col)
+    public class ImpactContact : MonoBehaviour
     {
-        if (_activeRagdoll.CanBeKnockoutByImpact() && col.relativeVelocity.magnitude > _activeRagdoll.RequiredForceToBeKO()) _activeRagdoll.ActivateRagdoll();
+        [SerializeField] private ActiveRagdoll _activeRagdoll;
+
+        private void OnCollisionEnter(Collision col)
+        {
+            if (_activeRagdoll.CanBeKnockoutByImpact() && col.relativeVelocity.magnitude > _activeRagdoll.RequiredForceToBeKO()) _activeRagdoll.ActivateRagdoll();
+        }
     }
 }
