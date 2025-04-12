@@ -171,15 +171,6 @@ public partial class @InputSystem: IInputActionCollection2, IDisposable
                     ""processors"": """",
                     ""interactions"": """",
                     ""initialStateCheck"": false
-                },
-                {
-                    ""name"": ""Gun"",
-                    ""type"": ""Button"",
-                    ""id"": ""3674f1df-0f8e-4365-9380-fd43f033f8b0"",
-                    ""expectedControlType"": """",
-                    ""processors"": """",
-                    ""interactions"": """",
-                    ""initialStateCheck"": false
                 }
             ],
             ""bindings"": [
@@ -390,7 +381,6 @@ public partial class @InputSystem: IInputActionCollection2, IDisposable
         m_Player_PunchLeft = m_Player.FindAction("PunchLeft", throwIfNotFound: true);
         m_Player_PunchRight = m_Player.FindAction("PunchRight", throwIfNotFound: true);
         m_Player_ResetLevel = m_Player.FindAction("ResetLevel", throwIfNotFound: true);
-        m_Player_Gun = m_Player.FindAction("Gun", throwIfNotFound: true);
         // Gun
         m_Gun = asset.FindActionMap("Gun", throwIfNotFound: true);
         m_Gun_Shoot = m_Gun.FindAction("Shoot", throwIfNotFound: true);
@@ -485,7 +475,6 @@ public partial class @InputSystem: IInputActionCollection2, IDisposable
     private readonly InputAction m_Player_PunchLeft;
     private readonly InputAction m_Player_PunchRight;
     private readonly InputAction m_Player_ResetLevel;
-    private readonly InputAction m_Player_Gun;
     /// <summary>
     /// Provides access to input actions defined in input action map "Player".
     /// </summary>
@@ -533,10 +522,6 @@ public partial class @InputSystem: IInputActionCollection2, IDisposable
         /// Provides access to the underlying input action "Player/ResetLevel".
         /// </summary>
         public InputAction @ResetLevel => m_Wrapper.m_Player_ResetLevel;
-        /// <summary>
-        /// Provides access to the underlying input action "Player/Gun".
-        /// </summary>
-        public InputAction @Gun => m_Wrapper.m_Player_Gun;
         /// <summary>
         /// Provides access to the underlying input action map instance.
         /// </summary>
@@ -590,9 +575,6 @@ public partial class @InputSystem: IInputActionCollection2, IDisposable
             @ResetLevel.started += instance.OnResetLevel;
             @ResetLevel.performed += instance.OnResetLevel;
             @ResetLevel.canceled += instance.OnResetLevel;
-            @Gun.started += instance.OnGun;
-            @Gun.performed += instance.OnGun;
-            @Gun.canceled += instance.OnGun;
         }
 
         /// <summary>
@@ -631,9 +613,6 @@ public partial class @InputSystem: IInputActionCollection2, IDisposable
             @ResetLevel.started -= instance.OnResetLevel;
             @ResetLevel.performed -= instance.OnResetLevel;
             @ResetLevel.canceled -= instance.OnResetLevel;
-            @Gun.started -= instance.OnGun;
-            @Gun.performed -= instance.OnGun;
-            @Gun.canceled -= instance.OnGun;
         }
 
         /// <summary>
@@ -844,13 +823,6 @@ public partial class @InputSystem: IInputActionCollection2, IDisposable
         /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
         /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
         void OnResetLevel(InputAction.CallbackContext context);
-        /// <summary>
-        /// Method invoked when associated input action "Gun" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
-        /// </summary>
-        /// <seealso cref="UnityEngine.InputSystem.InputAction.started" />
-        /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
-        /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
-        void OnGun(InputAction.CallbackContext context);
     }
     /// <summary>
     /// Interface to implement callback methods for all input action callbacks associated with input actions defined by "Gun" which allows adding and removing callbacks.

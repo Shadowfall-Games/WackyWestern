@@ -1,0 +1,19 @@
+fileFormatVersion: 2
+guid: 8f28d7cddc693574bb70783d3fd3df30
+timeCreated: 1476763577
+licenseType: Store
+MonoImporter:
+  serializedVersion: 2
+  defaultReferences: []
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 74089
+  packageName: Simple Note
+  packageVersion: 1.0.3
+  assetPath: Assets/SimpleNote/Scripts/SimpleNoteManager.cs
+  uploadId: 173367

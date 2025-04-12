@@ -1,10 +1,10 @@
 using UnityEngine;
 
-namespace Player.ActiveRagdoll
+namespace Player.Contacts
 {
     public class FeetContact : MonoBehaviour
     {
-        [SerializeField] private ActiveRagdoll _ragdollController;
+        [SerializeField] private ActiveRagdoll.ActiveRagdoll _ragdollController;
 
         private void OnCollisionEnter(Collision col)
         {

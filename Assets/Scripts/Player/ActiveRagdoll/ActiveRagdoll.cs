@@ -77,10 +77,10 @@ namespace Player.ActiveRagdoll
 
         private GameObject[] _playerParts;
 
-        JointDrive
+        private JointDrive
             BalanceOn, PoseOn, CoreStiffness, ReachStiffness, DriveOff;
 
-        Quaternion
+        private Quaternion
             HeadTarget, BodyTarget,
             UpperRightArmTarget, LowerRightArmTarget,
             UpperLeftArmTarget, LowerLeftArmTarget,
@@ -600,7 +600,7 @@ namespace Player.ActiveRagdoll
         {
 
             //punch right
-            if (!_punchingRight && _isRightPunchButtonPressed)
+            if (!_punchingRight && _isRightPunchButtonPressed && !_reachRightAxisUsed)
             {
                 _punchingRight = true;
 
@@ -638,7 +638,7 @@ namespace Player.ActiveRagdoll
 
 
             //punch left
-            if (!_punchingLeft && _isLeftPunchButtonPressed)
+            if (!_punchingLeft && _isLeftPunchButtonPressed && !_reachLeftAxisUsed)
             {
                 _punchingLeft = true;
 
@@ -899,7 +899,7 @@ namespace Player.ActiveRagdoll
 
             _centerOfMass.position = _centerOfMassPoint;
         }
-
+        
         public LayerMask ThisPlayerLayer() => _thisPlayerLayer;
 
         public float RequiredForceToBeKO() => _requiredForceToBeKO;

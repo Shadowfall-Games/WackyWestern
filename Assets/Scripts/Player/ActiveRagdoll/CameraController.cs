@@ -49,8 +49,7 @@ namespace Player.ActiveRagdoll
 
         private void Start()
         {
-            Cursor.lockState = CursorLockMode.Locked;
-            Cursor.visible = false;
+           Cursor.lockState = CursorLockMode.Locked;
 
             _camera = Camera.main;
         }

@@ -1,23 +1,35 @@
 using System;
 using HealthSystem;
+using Player.ActiveRagdoll;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using UnityEngine.VFX;
 
 namespace Gun
 {
     public class Gun : MonoBehaviour
     {
+        [Header("Raycast start point")]
+        [SerializeField] private Transform _originRay;
+        
+        [Header("Gun specs")]
         [SerializeField] private int _damage = 1;
+        [SerializeField] private float _recoilForce = 1;
         [SerializeField] private float _rateOfFire = 0.1f;
         [SerializeField] private float _rechargeSpeed = 3;
         [SerializeField] private int _maxBulletsAmount = 20;
-        [SerializeField] private Transform _originRay;
         [SerializeField] private bool _isMachineGun;
+
+        [Header("VFX")]
+        [SerializeField] private float _vfxDuration = 0.5f;
+        [SerializeField] private VisualEffect _impactExplosion;
         
         private InputSystem _inputSystem;
         private float _time;
         private int _currentBulletsAmount;
         private bool _canShoot = true;
+        
+        private ActiveRagdoll _currentActiveRagdoll;
 
         public event Action<int> OnShoot;
         public event Action OnRecharge;
@@ -57,9 +69,10 @@ namespace Gun
             if (Physics.Raycast(_originRay.position, _originRay.forward, out RaycastHit hit))
             {
                 var healthSystem = hit.collider.GetComponentInParent<IHealthSystem>();
-                Debug.Log(hit.collider);
                 if (healthSystem != null) healthSystem.ApplyDamage(_damage);
+                SpawnVFX(hit.point);
             }
+            
             _currentBulletsAmount--;
             if (_currentBulletsAmount == 0) Recharge();
             _time = 0;
@@ -77,6 +90,14 @@ namespace Gun
             _canShoot = true;
             _currentBulletsAmount = _maxBulletsAmount;
             _time = _rateOfFire;
+        }
+        
+        private void SpawnVFX(Vector3 position)
+        {
+            var vfxInstance = Instantiate(_impactExplosion, position, Quaternion.identity);
+
+            VisualEffect vfx = vfxInstance.GetComponent<VisualEffect>();
+            Destroy(vfxInstance.gameObject, _vfxDuration);
         }
         
         private void Recharge(InputAction.CallbackContext obj) => Recharge();
