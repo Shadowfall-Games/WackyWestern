@@ -1,5 +1,6 @@
 using System.Collections;
 using UnityEngine;
+using UnityEngine.Serialization;
 
 namespace Player.ActiveRagdoll
 {
@@ -51,7 +52,7 @@ namespace Player.ActiveRagdoll
 
         [Header("Actions")]
         [SerializeField] private bool _canBeKnockoutByImpact = true;
-        [SerializeField] private float _requiredForceToBeKO = 40;
+        [FormerlySerializedAs("_requiredForceToBeKO")] [SerializeField] private float _requiredForceToBeKo = 40;
         [SerializeField] private bool _canPunch = true;
         [SerializeField] private float _punchForce = 25;
 
@@ -64,8 +65,8 @@ namespace Player.ActiveRagdoll
             _stepRight, _stepLeft, _alertLegRight,
             _alertLegLeft, _balanced = true, _gettingUp,
             _resetPose, _isRagdoll, _isKeyDown, _moveAxisUsed,
-            jumpAxisUsed, _reachLeftAxisUsed, _reachRightAxisUsed,
-            _isRightPunchButtonPressed, _isLeftPunchButtonPressed;
+            _jumpAxisUsed, _reachLeftAxisUsed, _reachRightAxisUsed,
+            _isRightPunchButtonPressed, _isLeftPunchButtonPressed, _canRotate = true;
 
         private bool
             _jumping, _isJumping, _inAir,
@@ -78,14 +79,14 @@ namespace Player.ActiveRagdoll
         private GameObject[] _playerParts;
 
         private JointDrive
-            BalanceOn, PoseOn, CoreStiffness, ReachStiffness, DriveOff;
+            _balanceOn, _poseOn, _coreStiffness, _reachStiffness, _driveOff;
 
         private Quaternion
-            HeadTarget, BodyTarget,
-            UpperRightArmTarget, LowerRightArmTarget,
-            UpperLeftArmTarget, LowerLeftArmTarget,
-            UpperRightLegTarget, LowerRightLegTarget,
-            UpperLeftLegTarget, LowerLeftLegTarget;
+            _bodyTarget,
+            _upperRightArmTarget, _lowerRightArmTarget,
+            _upperLeftArmTarget, _lowerLeftArmTarget,
+            _upperRightLegTarget, _lowerRightLegTarget,
+            _upperLeftLegTarget, _lowerLeftLegTarget;
 
         private Vector2 _move;
         private InputSystem _inputSystem;
@@ -124,7 +125,7 @@ namespace Player.ActiveRagdoll
             }
         }
 
-        void FixedUpdate()
+        private void FixedUpdate()
         {
             Walking();
 
@@ -169,11 +170,11 @@ namespace Player.ActiveRagdoll
         {
             _camera = Camera.main;
 
-            BalanceOn = SetupDrive(_balanceStrength);
-            PoseOn = SetupDrive(_limbStrength);
-            CoreStiffness = SetupDrive(_coreStrength);
-            ReachStiffness = SetupDrive(_armReachStiffness);
-            DriveOff = SetupDrive(25);
+            _balanceOn = SetupDrive(_balanceStrength);
+            _poseOn = SetupDrive(_limbStrength);
+            _coreStiffness = SetupDrive(_coreStrength);
+            _reachStiffness = SetupDrive(_armReachStiffness);
+            _driveOff = SetupDrive(25);
 
             _playerParts = new GameObject[]
             {
@@ -194,16 +195,15 @@ namespace Player.ActiveRagdoll
                 _leftFoot //12
             };
 
-            BodyTarget = _playerParts[1].GetComponent<ConfigurableJoint>().targetRotation;
-            HeadTarget = _playerParts[2].GetComponent<ConfigurableJoint>().targetRotation;
-            UpperRightArmTarget = _playerParts[3].GetComponent<ConfigurableJoint>().targetRotation;
-            LowerRightArmTarget = _playerParts[4].GetComponent<ConfigurableJoint>().targetRotation;
-            UpperLeftArmTarget = _playerParts[5].GetComponent<ConfigurableJoint>().targetRotation;
-            LowerLeftArmTarget = _playerParts[6].GetComponent<ConfigurableJoint>().targetRotation;
-            UpperRightLegTarget = _playerParts[7].GetComponent<ConfigurableJoint>().targetRotation;
-            LowerRightLegTarget = _playerParts[8].GetComponent<ConfigurableJoint>().targetRotation;
-            UpperLeftLegTarget = _playerParts[9].GetComponent<ConfigurableJoint>().targetRotation;
-            LowerLeftLegTarget = _playerParts[10].GetComponent<ConfigurableJoint>().targetRotation;
+            _bodyTarget = _playerParts[1].GetComponent<ConfigurableJoint>().targetRotation;
+            _upperRightArmTarget = _playerParts[3].GetComponent<ConfigurableJoint>().targetRotation;
+            _lowerRightArmTarget = _playerParts[4].GetComponent<ConfigurableJoint>().targetRotation;
+            _upperLeftArmTarget = _playerParts[5].GetComponent<ConfigurableJoint>().targetRotation;
+            _lowerLeftArmTarget = _playerParts[6].GetComponent<ConfigurableJoint>().targetRotation;
+            _upperRightLegTarget = _playerParts[7].GetComponent<ConfigurableJoint>().targetRotation;
+            _lowerRightLegTarget = _playerParts[8].GetComponent<ConfigurableJoint>().targetRotation;
+            _upperLeftLegTarget = _playerParts[9].GetComponent<ConfigurableJoint>().targetRotation;
+            _lowerLeftLegTarget = _playerParts[10].GetComponent<ConfigurableJoint>().targetRotation;
         }
 
         private void GroundCheck()
@@ -354,17 +354,17 @@ namespace Player.ActiveRagdoll
                 {
                     case > 0:
                     {
-                        if (!_walkForward) SetPlayerState(true, false, true, true, PoseOn);
+                        if (!_walkForward) SetPlayerState(true, false, true, true, _poseOn);
                         break;
                     }
                     case < 0:
                     {
-                        if (!_walkBackward) SetPlayerState(false, true, true, true, PoseOn);
+                        if (!_walkBackward) SetPlayerState(false, true, true, true, _poseOn);
                         break;
                     }
                     case 0:
                     {
-                        if (_walkForward || _walkBackward && _moveAxisUsed) SetPlayerState(false, false, false, false, DriveOff);
+                        if (_walkForward || _walkBackward && _moveAxisUsed) SetPlayerState(false, false, false, false, _driveOff);
                         break;
                     }
                 }
@@ -375,14 +375,12 @@ namespace Player.ActiveRagdoll
         {
             if (_forwardIsCameraDirection)
             {
-                //Camera Direction
                 //Turn with camera
                 var lookPos = _camera.transform.forward;
                 lookPos.y = 0;
                 var rotation = Quaternion.LookRotation(lookPos);
                 _playerParts[0].GetComponent<ConfigurableJoint>().targetRotation = Quaternion.Slerp(_playerParts[0].GetComponent<ConfigurableJoint>().targetRotation, Quaternion.Inverse(rotation), Time.deltaTime * _turnSpeed);
             }
-
             else
             {
                 //Self Direction
@@ -409,19 +407,19 @@ namespace Player.ActiveRagdoll
         {
             if (_inputSystem.Player.Jump.IsPressed())
             {
-                if (!jumpAxisUsed)
+                if (!_jumpAxisUsed)
                 {
                     if (_balanced && !_inAir) _jumping = true;
 
                     else if (!_balanced) DeactivateRagdoll();
                 }
 
-                jumpAxisUsed = true;
+                _jumpAxisUsed = true;
             }
 
             else
             {
-                jumpAxisUsed = false;
+                _jumpAxisUsed = false;
             }
 
 
@@ -460,7 +458,7 @@ namespace Player.ActiveRagdoll
 
         private void PlayerReach()
         {
-            if (1 == 1)
+            if (true && _canRotate)
             {
                 if (_mouseYAxisBody <= _maxReachValue && _mouseYAxisBody >= -_minReachValue)
                 {
@@ -488,11 +486,11 @@ namespace Player.ActiveRagdoll
                 if (!_reachLeftAxisUsed)
                 {
                     //Adjust Left Arm joint strength
-                    SetDrives(ReachStiffness, 5, 6);
+                    SetDrives(_reachStiffness, 5, 6);
 
                     //Adjust body joint strength
-                    _playerParts[1].GetComponent<ConfigurableJoint>().angularXDrive = CoreStiffness;
-                    _playerParts[1].GetComponent<ConfigurableJoint>().angularYZDrive = CoreStiffness;
+                    _playerParts[1].GetComponent<ConfigurableJoint>().angularXDrive = _coreStiffness;
+                    _playerParts[1].GetComponent<ConfigurableJoint>().angularYZDrive = _coreStiffness;
 
                     _reachLeftAxisUsed = true;
                 }
@@ -522,15 +520,15 @@ namespace Player.ActiveRagdoll
                 {
                     if (_balanced)
                     {
-                        SetDrives(PoseOn, 5, 6);
+                        SetDrives(_poseOn, 5, 6);
 
-                        _playerParts[1].GetComponent<ConfigurableJoint>().angularXDrive = PoseOn;
-                        _playerParts[1].GetComponent<ConfigurableJoint>().angularYZDrive = PoseOn;
+                        _playerParts[1].GetComponent<ConfigurableJoint>().angularXDrive = _poseOn;
+                        _playerParts[1].GetComponent<ConfigurableJoint>().angularYZDrive = _poseOn;
                     }
 
                     else if (!_balanced)
                     {
-                        SetDrives(DriveOff, 5, 6);
+                        SetDrives(_driveOff, 5, 6);
                     }
 
                     _resetPose = true;
@@ -548,11 +546,11 @@ namespace Player.ActiveRagdoll
                 if (!_reachRightAxisUsed)
                 {
                     //Adjust Right Arm joint strength
-                    SetDrives(ReachStiffness, 3, 4);
+                    SetDrives(_reachStiffness, 3, 4);
 
                     //Adjust body joint strength
-                    _playerParts[1].GetComponent<ConfigurableJoint>().angularXDrive = CoreStiffness;
-                    _playerParts[1].GetComponent<ConfigurableJoint>().angularYZDrive = CoreStiffness;
+                    _playerParts[1].GetComponent<ConfigurableJoint>().angularXDrive = _coreStiffness;
+                    _playerParts[1].GetComponent<ConfigurableJoint>().angularYZDrive = _coreStiffness;
 
                     _reachRightAxisUsed = true;
                 }
@@ -580,15 +578,15 @@ namespace Player.ActiveRagdoll
         
             if (_balanced)
             {
-                SetDrives(PoseOn, 3, 4);
+                SetDrives(_poseOn, 3, 4);
 
-                _playerParts[1].GetComponent<ConfigurableJoint>().angularXDrive = PoseOn;
-                _playerParts[1].GetComponent<ConfigurableJoint>().angularYZDrive = PoseOn;
+                _playerParts[1].GetComponent<ConfigurableJoint>().angularXDrive = _poseOn;
+                _playerParts[1].GetComponent<ConfigurableJoint>().angularYZDrive = _poseOn;
             }
 
             else if (!_balanced)
             {
-                SetDrives(DriveOff, 3, 4);
+                SetDrives(_driveOff, 3, 4);
             }
 
             _resetPose = true;
@@ -630,8 +628,8 @@ namespace Player.ActiveRagdoll
                     yield return new WaitForSeconds(0.3f);
                     if (!_isRightPunchButtonPressed)
                     {
-                        _playerParts[3].GetComponent<ConfigurableJoint>().targetRotation = UpperRightArmTarget;
-                        _playerParts[4].GetComponent<ConfigurableJoint>().targetRotation = LowerRightArmTarget;
+                        _playerParts[3].GetComponent<ConfigurableJoint>().targetRotation = _upperRightArmTarget;
+                        _playerParts[4].GetComponent<ConfigurableJoint>().targetRotation = _lowerRightArmTarget;
                     }
                 }
             }
@@ -668,8 +666,8 @@ namespace Player.ActiveRagdoll
                     yield return new WaitForSeconds(0.3f);
                     if (!_isLeftPunchButtonPressed)
                     {
-                        _playerParts[5].GetComponent<ConfigurableJoint>().targetRotation = UpperLeftArmTarget;
-                        _playerParts[6].GetComponent<ConfigurableJoint>().targetRotation = LowerLeftArmTarget;
+                        _playerParts[5].GetComponent<ConfigurableJoint>().targetRotation = _upperLeftArmTarget;
+                        _playerParts[6].GetComponent<ConfigurableJoint>().targetRotation = _lowerLeftArmTarget;
                     }
                 }
             }
@@ -758,8 +756,8 @@ namespace Player.ActiveRagdoll
                 else
                 {
                     //reset to idle
-                    _playerParts[7].GetComponent<ConfigurableJoint>().targetRotation = Quaternion.Lerp(_playerParts[7].GetComponent<ConfigurableJoint>().targetRotation, UpperRightLegTarget, (8f) * Time.fixedDeltaTime);
-                    _playerParts[8].GetComponent<ConfigurableJoint>().targetRotation = Quaternion.Lerp(_playerParts[8].GetComponent<ConfigurableJoint>().targetRotation, LowerRightLegTarget, (17f) * Time.fixedDeltaTime);
+                    _playerParts[7].GetComponent<ConfigurableJoint>().targetRotation = Quaternion.Lerp(_playerParts[7].GetComponent<ConfigurableJoint>().targetRotation, _upperRightLegTarget, (8f) * Time.fixedDeltaTime);
+                    _playerParts[8].GetComponent<ConfigurableJoint>().targetRotation = Quaternion.Lerp(_playerParts[8].GetComponent<ConfigurableJoint>().targetRotation, _lowerRightLegTarget, (17f) * Time.fixedDeltaTime);
 
                     //feet force down
                     _playerParts[11].GetComponent<Rigidbody>().AddForce(-Vector3.up * _feetMountForce * Time.deltaTime, ForceMode.Impulse);
@@ -808,8 +806,8 @@ namespace Player.ActiveRagdoll
                 else
                 {
                     //reset to idle
-                    _playerParts[9].GetComponent<ConfigurableJoint>().targetRotation = Quaternion.Lerp(_playerParts[9].GetComponent<ConfigurableJoint>().targetRotation, UpperLeftLegTarget, (7f) * Time.fixedDeltaTime);
-                    _playerParts[10].GetComponent<ConfigurableJoint>().targetRotation = Quaternion.Lerp(_playerParts[10].GetComponent<ConfigurableJoint>().targetRotation, LowerLeftLegTarget, (18f) * Time.fixedDeltaTime);
+                    _playerParts[9].GetComponent<ConfigurableJoint>().targetRotation = Quaternion.Lerp(_playerParts[9].GetComponent<ConfigurableJoint>().targetRotation, _upperLeftLegTarget, (7f) * Time.fixedDeltaTime);
+                    _playerParts[10].GetComponent<ConfigurableJoint>().targetRotation = Quaternion.Lerp(_playerParts[10].GetComponent<ConfigurableJoint>().targetRotation, _lowerLeftLegTarget, (18f) * Time.fixedDeltaTime);
 
                     //feet force down
                     _playerParts[11].GetComponent<Rigidbody>().AddForce(-Vector3.up * _feetMountForce * Time.deltaTime, ForceMode.Impulse);
@@ -824,23 +822,23 @@ namespace Player.ActiveRagdoll
             _balanced = false;
 
             //Root
-            _playerParts[0].GetComponent<ConfigurableJoint>().angularXDrive = DriveOff;
-            _playerParts[0].GetComponent<ConfigurableJoint>().angularYZDrive = DriveOff;
+            _playerParts[0].GetComponent<ConfigurableJoint>().angularXDrive = _driveOff;
+            _playerParts[0].GetComponent<ConfigurableJoint>().angularYZDrive = _driveOff;
             //head
-            _playerParts[2].GetComponent<ConfigurableJoint>().angularXDrive = DriveOff;
-            _playerParts[2].GetComponent<ConfigurableJoint>().angularYZDrive = DriveOff;
+            _playerParts[2].GetComponent<ConfigurableJoint>().angularXDrive = _driveOff;
+            _playerParts[2].GetComponent<ConfigurableJoint>().angularYZDrive = _driveOff;
             //arms
             if (!_reachRightAxisUsed)
             {
-                SetDrives(DriveOff, 3, 4);
+                SetDrives(_driveOff, 3, 4);
             }
 
             if (!_reachLeftAxisUsed)
             {
-                SetDrives(DriveOff, 5, 6);
+                SetDrives(_driveOff, 5, 6);
             }
             //legs
-            SetDrives(DriveOff, 7, 12);
+            SetDrives(_driveOff, 7, 12);
         }
 
         private void DeactivateRagdoll()
@@ -849,23 +847,23 @@ namespace Player.ActiveRagdoll
             _balanced = true;
 
             //Root
-            _playerParts[0].GetComponent<ConfigurableJoint>().angularXDrive = BalanceOn;
-            _playerParts[0].GetComponent<ConfigurableJoint>().angularYZDrive = BalanceOn;
+            _playerParts[0].GetComponent<ConfigurableJoint>().angularXDrive = _balanceOn;
+            _playerParts[0].GetComponent<ConfigurableJoint>().angularYZDrive = _balanceOn;
             //head
-            _playerParts[2].GetComponent<ConfigurableJoint>().angularXDrive = PoseOn;
-            _playerParts[2].GetComponent<ConfigurableJoint>().angularYZDrive = PoseOn;
+            _playerParts[2].GetComponent<ConfigurableJoint>().angularXDrive = _poseOn;
+            _playerParts[2].GetComponent<ConfigurableJoint>().angularYZDrive = _poseOn;
             //arms
             if (!_reachRightAxisUsed)
             {
-                SetDrives(PoseOn, 3, 4);
+                SetDrives(_poseOn, 3, 4);
             }
 
             if (!_reachLeftAxisUsed)
             {
-                SetDrives(PoseOn, 5, 6);
+                SetDrives(_poseOn, 5, 6);
             }
             //legs
-            SetDrives(PoseOn, 7, 12);
+            SetDrives(_poseOn, 7, 12);
 
             _resetPose = true;
         }
@@ -874,11 +872,11 @@ namespace Player.ActiveRagdoll
         {
             if (_resetPose && !_jumping)
             {
-                _playerParts[1].GetComponent<ConfigurableJoint>().targetRotation = BodyTarget;
-                _playerParts[3].GetComponent<ConfigurableJoint>().targetRotation = UpperRightArmTarget;
-                _playerParts[4].GetComponent<ConfigurableJoint>().targetRotation = LowerRightArmTarget;
-                _playerParts[5].GetComponent<ConfigurableJoint>().targetRotation = UpperLeftArmTarget;
-                _playerParts[6].GetComponent<ConfigurableJoint>().targetRotation = LowerLeftArmTarget;
+                _playerParts[1].GetComponent<ConfigurableJoint>().targetRotation = _bodyTarget;
+                _playerParts[3].GetComponent<ConfigurableJoint>().targetRotation = _upperRightArmTarget;
+                _playerParts[4].GetComponent<ConfigurableJoint>().targetRotation = _lowerRightArmTarget;
+                _playerParts[5].GetComponent<ConfigurableJoint>().targetRotation = _upperLeftArmTarget;
+                _playerParts[6].GetComponent<ConfigurableJoint>().targetRotation = _lowerLeftArmTarget;
 
                 _mouseYAxisArms = 0;
 
@@ -899,21 +897,18 @@ namespace Player.ActiveRagdoll
 
             _centerOfMass.position = _centerOfMassPoint;
         }
-        
+
+        public void SetCanRotate(bool value) => _canRotate = value;
         public LayerMask ThisPlayerLayer() => _thisPlayerLayer;
-
-        public float RequiredForceToBeKO() => _requiredForceToBeKO;
-
+        public float RequiredForceToBeKo() => _requiredForceToBeKo;
+        public bool CanRotate() => _canRotate;
         public bool IsJumping() => _isJumping;
-
         public bool InAir() => _inAir;
-
-        public bool PunchingRight() => _punchingRight;
-
         public bool PunchingLeft() => _punchingLeft;
-
-        public bool UseConrols() => _useControls;
-
+        public bool PunchingRight() => _punchingRight;
+        public bool ReachLeftAxisUsed() => _reachLeftAxisUsed;
+        public bool ReachRightAxisUsed() => _reachRightAxisUsed;
+        public bool UseControls() => _useControls;
         public bool CanBeKnockoutByImpact() => _canBeKnockoutByImpact;
 
         private void OnDrawGizmos()

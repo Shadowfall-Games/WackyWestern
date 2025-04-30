@@ -1,13 +1,13 @@
 using System;
+using System.Threading;
 using HealthSystem;
-using Player.ActiveRagdoll;
 using UnityEngine;
 using UnityEngine.InputSystem;
-using UnityEngine.VFX;
 
 namespace Gun
 {
-    public class Gun : MonoBehaviour
+    [Serializable]
+    public class Gun
     {
         [Header("Raycast start point")]
         [SerializeField] private Transform _originRay;
@@ -19,33 +19,33 @@ namespace Gun
         [SerializeField] private float _rechargeSpeed = 3;
         [SerializeField] private int _maxBulletsAmount = 20;
         [SerializeField] private bool _isMachineGun;
-
-        [Header("VFX")]
-        [SerializeField] private float _vfxDuration = 0.5f;
-        [SerializeField] private VisualEffect _impactExplosion;
         
         private InputSystem _inputSystem;
         private float _time;
         private int _currentBulletsAmount;
-        private bool _canShoot = true;
+        private bool _canShoot = false;
         
-        private ActiveRagdoll _currentActiveRagdoll;
+        private CancellationToken _destroyCancellationToken;
 
-        public event Action<int> OnShoot;
-        public event Action OnRecharge;
+        public event Action<int> OnShot;
+        public event Action<Vector3> OnHit;
+        public event Action OnRecharged;
 
-        private void OnEnable() =>  _inputSystem.Gun.Recharge.performed += Recharge;
+        public void OnEnable() =>  _inputSystem.Gun.Recharge.performed += Recharge;
+        public void OnDisable() => _inputSystem.Gun.Recharge.performed -= Recharge;
 
-        private void Awake()
+        public void Init(CancellationToken destroyCancellationToken)
         {
             _inputSystem = new InputSystem();
             _inputSystem.Gun.Enable();
+            
+            _destroyCancellationToken = destroyCancellationToken;
             
             _currentBulletsAmount = _maxBulletsAmount;
             _time = _rateOfFire;
         }
 
-        private void Update()
+        public void Update()
         {
             Debug.DrawRay(_originRay.position, _originRay.forward, Color.blue);
 
@@ -70,38 +70,30 @@ namespace Gun
             {
                 var healthSystem = hit.collider.GetComponentInParent<IHealthSystem>();
                 if (healthSystem != null) healthSystem.ApplyDamage(_damage);
-                SpawnVFX(hit.point);
+                OnHit?.Invoke(hit.point);
             }
             
             _currentBulletsAmount--;
             if (_currentBulletsAmount == 0) Recharge();
             _time = 0;
             
-            OnShoot?.Invoke(_currentBulletsAmount);
+            OnShot?.Invoke(_currentBulletsAmount);
         }
 
         private async void Recharge()
         {
-            OnRecharge?.Invoke();
+            OnRecharged?.Invoke();
 
-            await Awaitable.WaitForSecondsAsync(_rechargeSpeed, destroyCancellationToken);
+            await Awaitable.WaitForSecondsAsync(_rechargeSpeed, _destroyCancellationToken);
             
             _canShoot = false;
             _canShoot = true;
             _currentBulletsAmount = _maxBulletsAmount;
             _time = _rateOfFire;
         }
-        
-        private void SpawnVFX(Vector3 position)
-        {
-            var vfxInstance = Instantiate(_impactExplosion, position, Quaternion.identity);
 
-            VisualEffect vfx = vfxInstance.GetComponent<VisualEffect>();
-            Destroy(vfxInstance.gameObject, _vfxDuration);
-        }
+        public void SetCanShoot(bool value) => _canShoot = value;
         
         private void Recharge(InputAction.CallbackContext obj) => Recharge();
-
-        private void OnDisable() => _inputSystem.Gun.Recharge.performed -= Recharge;
     }
 }

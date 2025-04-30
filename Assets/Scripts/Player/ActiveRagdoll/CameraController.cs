@@ -1,9 +1,12 @@
 using UnityEngine;
+using UnityEngine.Serialization;
 
 namespace Player.ActiveRagdoll
 {
     public class CameraController : MonoBehaviour
     {
+        [SerializeField] private bool _canRotate = true;
+        [Space(5)]
         [Header("Object To Follow")]
         [SerializeField] private Transform _objectToFollow;
 
@@ -16,10 +19,10 @@ namespace Player.ActiveRagdoll
         [SerializeField] private float _distanceToFade = 3;
         [SerializeField] private float _smoothness = 0.07f;
 
-        [Header("Sensivity")]
-        [SerializeField] private float _sensivityX = 2;
-        [SerializeField] private float _sensivityY = 2;
-        [SerializeField] private float _sensivityMultiplayer = 0.1f;
+        [Header("Sensitivity")]
+        [SerializeField] private float _sensitivityX = 2;
+        [SerializeField] private float _sensitivityY = 2;
+        [SerializeField] private float _sensitivityMultiplayer = 0.1f;
 
         [Header("Rotation Angles")]
         [SerializeField] private float _minAngle = -65;
@@ -29,8 +32,8 @@ namespace Player.ActiveRagdoll
         [SerializeField] private LayerMask _ignoreLayer;
 
         private Camera _camera;
-        private float _currentX = 0.0f;
-        private float _currentY = 0.0f;
+        private float _currentX;
+        private float _currentY;
         private Quaternion _rotation;
         private Vector3 _direction;
 
@@ -57,8 +60,8 @@ namespace Player.ActiveRagdoll
 
         private void Update()
         {
-            _currentX = _currentX + _inputSystem.Player.Look.ReadValue<Vector2>().x * _sensivityX * _sensivityMultiplayer;
-            _currentY = _currentY + _inputSystem.Player.Look.ReadValue<Vector2>().y * _sensivityY * _sensivityMultiplayer;
+            _currentX += _inputSystem.Player.Look.ReadValue<Vector2>().x * _sensitivityX * _sensitivityMultiplayer;
+            _currentY += _inputSystem.Player.Look.ReadValue<Vector2>().y * _sensitivityY * _sensitivityMultiplayer;
 
             _currentY = Mathf.Clamp(_currentY, _minAngle, _maxAngle);
         }
@@ -67,25 +70,29 @@ namespace Player.ActiveRagdoll
         private void FixedUpdate()
         {
             _direction = new Vector3(0, 0, -_distance);
-            _rotation = Quaternion.Euler(-_currentY, _currentX, 0);
+            if (_canRotate) _rotation = Quaternion.Euler(-_currentY, _currentX, 0);
             _camera.transform.position = Vector3.Lerp(_camera.transform.position, _objectToFollow.position + _rotation * _direction, _smoothness);
             if (Physics.Linecast(_objectToFollow.position, _camera.transform.position, out RaycastHit hit, ~_ignoreLayer))
             {
                 var currentPosition = hit.point + _camera.transform.forward * _distanceOffset;
                 _camera.transform.position = currentPosition;
 
-                Color color = _playerModel.material.color;
+                var color = _playerModel.material.color;
                 color.a = (Vector3.Distance(currentPosition, _objectToFollow.position) / _distanceToFade);
                 _playerModel.material.color = color;
             }
             else
             {
-                Color color = _playerModel.material.color;
+                var color = _playerModel.material.color;
                 color.a = 1;
                 _playerModel.material.color = color;
             }
             _camera.transform.LookAt(_objectToFollow.position);
         }
+        
+        public void SetCanRotate(bool value) => _canRotate = value;
+
+        public bool CanRotate() => _canRotate;
 
     }
 }

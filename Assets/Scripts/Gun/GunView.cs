@@ -1,61 +1,35 @@
 using System;
-using Player.Contacts;
 using UnityEngine;
+using UnityEngine.VFX;
+using Object = UnityEngine.Object;
 
 namespace Gun
 {
-    public class GunView : GrabbedObject
+    [Serializable]
+    public class GunView
     {
-        [SerializeField] private float _jointForce = 600;
-        [SerializeField] private float _jointDamping = 6;
+        [SerializeField] private float _vfxDuration = 0.5f;
+        [SerializeField] private VisualEffect _impactExplosion;
         
-        private Camera _camera;
-        private HandContact _handContact;
-        private ConfigurableJoint _configurableJoint;
-        private Rigidbody _rigidBody;
         private Gun _gun;
         
-        private void Start()
+        public void Init(Gun gun)
         {
-            _camera = Camera.main;
-            _configurableJoint = GetComponent<ConfigurableJoint>();
-            _rigidBody = GetComponent<Rigidbody>();
-            _gun = GetComponent<Gun>();
+            _gun = gun;
+
+            _gun.OnHit += SpawnVFX;
         }
 
-        public override void Grab(HandContact handContact)
+        public void OnDestroy()
         {
-            _handContact = handContact;
-            _gun.enabled = true;
-            _configurableJoint = gameObject.AddComponent<ConfigurableJoint>();
-            _configurableJoint.connectedBody = handContact.GetComponent<Rigidbody>();
-            ConfigurateJoint(ConfigurableJointMotion.Locked);
+            _gun.OnHit -= SpawnVFX;
         }
-        
-        public override void Drop()
+        private void SpawnVFX(Vector3 position)
         {
-            _handContact = null;
-            _gun.enabled = false;
-            Destroy(_configurableJoint);
-        }
+            var vfxInstance = Object.Instantiate(_impactExplosion, position, Quaternion.identity);
 
-        private void ConfigurateJoint(ConfigurableJointMotion motion)
-        {
-            _configurableJoint.xMotion = motion;
-            _configurableJoint.yMotion = motion;
-            _configurableJoint.zMotion = motion;
-            _configurableJoint.rotationDriveMode = RotationDriveMode.Slerp;
-            _configurableJoint.slerpDrive = NewJointDrive(_jointForce, _jointDamping);
-        }
-        
-        private JointDrive NewJointDrive (float force, float damping)
-        {
-            var drive = new JointDrive();
-            drive.mode = JointDriveMode.Position;
-            drive.positionSpring = force;
-            drive.positionDamper = damping;
-            drive.maximumForce = Mathf.Infinity;
-            return drive;
+            VisualEffect vfx = vfxInstance.GetComponent<VisualEffect>();
+            Object.Destroy(vfxInstance.gameObject, _vfxDuration);
         }
     }
 }
