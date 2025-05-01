@@ -1,21 +1,21 @@
-using System;
 using UnityEngine;
 using UnityEngine.VFX;
 using Object = UnityEngine.Object;
 
 namespace Gun
 {
-    [Serializable]
     public class GunView
     {
-        [SerializeField] private float _vfxDuration = 0.5f;
-        [SerializeField] private VisualEffect _impactExplosion;
+        private readonly float _vfxDuration;
+        private readonly VisualEffect _impactExplosion;
         
-        private Gun _gun;
+        private readonly Gun _gun;
         
-        public void Init(Gun gun)
+        public GunView(Gun gun, float vfxDuration, VisualEffect impactExplosion)
         {
             _gun = gun;
+            _vfxDuration = vfxDuration;
+            _impactExplosion = impactExplosion;
 
             _gun.OnHit += SpawnVFX;
         }

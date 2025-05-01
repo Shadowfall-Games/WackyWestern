@@ -1,52 +1,57 @@
-using System;
 using Player.ActiveRagdoll;
 using UnityEngine;
 
 namespace Player.Hand
 {
-    [Serializable]
     public class HandRotation
     {
-        [SerializeField] private float _rotationSpeed = 0.6f;
-        [SerializeField] private float _rotationLimit = 90;
-        
-        private bool _isLeftHand;
+        private readonly float _rotationSpeed;
+
+        private readonly bool _isLeftHand;
         private bool _haveObjectInHand;
         
         private Vector2 _mouseDelta;
-        private Quaternion _defaultRotation;
+        private readonly Quaternion _defaultRotation;
         
-        private InputSystem _inputSystem;
-        private CameraController _cameraController;
-        private ConfigurableJoint _configurableJoint;
-        private ActiveRagdoll.ActiveRagdoll _activeRagdoll;
+        private readonly InputSystem _inputSystem;
+        private readonly CameraController _cameraController;
+        private readonly ConfigurableJoint _configurableJoint;
+        private readonly ActiveRagdoll.ActiveRagdoll _activeRagdoll;
+        private readonly HandContact _handContact;
 
-        public void Init(ActiveRagdoll.ActiveRagdoll activeRagdoll, ConfigurableJoint configurableJoint, CameraController cameraController, bool isLeftHand)
+        public HandRotation(ActiveRagdoll.ActiveRagdoll activeRagdoll, ConfigurableJoint configurableJoint, CameraController cameraController, HandContact handContact, bool isLeftHand, float rotationSpeed, float rotationLimit, InputSystem inputSystem)
         {
             _activeRagdoll = activeRagdoll;
             _configurableJoint = configurableJoint;
             _cameraController = cameraController;
+            _handContact = handContact;
             _isLeftHand = isLeftHand;
-            
+            _rotationSpeed = rotationSpeed;
+            _inputSystem = inputSystem;
+
             _defaultRotation = _configurableJoint.targetRotation;
 
-            _configurableJoint.angularYLimit = new SoftJointLimit { limit = _rotationLimit };
-            _configurableJoint.angularZLimit = new SoftJointLimit { limit = _rotationLimit };
-            
-            _inputSystem = new InputSystem();
-            _inputSystem.Enable();
+            _configurableJoint.angularYLimit = new SoftJointLimit { limit = rotationLimit };
+            _configurableJoint.angularZLimit = new SoftJointLimit { limit = rotationLimit };
         }
 
-        public void OnDisable()
+        public void Start()
         {
-            _inputSystem.Disable();
+            _handContact.ObjectPickedUp += ObjectPickedUp;
+            _handContact.ObjectDroppedOut += ResetRotation;
+        }
+
+        public void OnDestroy()
+        {
+            _handContact.ObjectPickedUp -= ObjectPickedUp;
+            _handContact.ObjectDroppedOut -= ResetRotation;
         }
         
         public void Update()
         {
             _mouseDelta = _inputSystem.Player.Look.ReadValue<Vector2>();
             
-            if (_haveObjectInHand) Rotate();
+            if (_haveObjectInHand && !_handContact.GrabbedObject().IsObjectInTwoHands()) Rotate();
         }
 
         private void Rotate()
@@ -74,8 +79,12 @@ namespace Player.Hand
             }
         }
         
-        public void ResetRotation() => _configurableJoint.targetRotation = _defaultRotation;
-        
-        public void SetHaveObjectInHand(bool value) => _haveObjectInHand = value;
+        private void ObjectPickedUp() => SetHaveObjectInHand(true);
+        private void SetHaveObjectInHand(bool value) => _haveObjectInHand = value;
+        private void ResetRotation()
+        {
+            _configurableJoint.targetRotation = _defaultRotation;
+            SetHaveObjectInHand(false);
+        }
     }
 }

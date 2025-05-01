@@ -6,27 +6,21 @@ using UnityEngine.InputSystem;
 
 namespace Gun
 {
-    [Serializable]
     public class Gun
     {
-        [Header("Raycast start point")]
-        [SerializeField] private Transform _originRay;
-        
-        [Header("Gun specs")]
-        [SerializeField] private int _damage = 1;
-        [SerializeField] private float _recoilForce = 1;
-        [SerializeField] private float _rateOfFire = 0.1f;
-        [SerializeField] private float _rechargeSpeed = 3;
-        [SerializeField] private int _maxBulletsAmount = 20;
-        [SerializeField] private bool _isMachineGun;
-        
-        private InputSystem _inputSystem;
+        private readonly int _damage;
+        private readonly float _rateOfFire;
+        private readonly float _rechargeSpeed;
+        private readonly int _maxBulletsAmount;
+        private readonly bool _isMachineGun;
         private float _time;
         private int _currentBulletsAmount;
-        private bool _canShoot = false;
+        private bool _canShoot;
         
-        private CancellationToken _destroyCancellationToken;
+        private readonly CancellationToken _destroyCancellationToken;
 
+        private readonly Transform _originRay;
+        private readonly InputSystem _inputSystem;
         public event Action<int> OnShot;
         public event Action<Vector3> OnHit;
         public event Action OnRecharged;
@@ -34,13 +28,19 @@ namespace Gun
         public void OnEnable() =>  _inputSystem.Gun.Recharge.performed += Recharge;
         public void OnDisable() => _inputSystem.Gun.Recharge.performed -= Recharge;
 
-        public void Init(CancellationToken destroyCancellationToken)
+        public Gun(CancellationToken destroyCancellationToken, Transform originRay, int damage, float rateOfFire, float rechargeSpeed, int maxBulletsAmount, bool isMachineGun)
         {
             _inputSystem = new InputSystem();
             _inputSystem.Gun.Enable();
             
             _destroyCancellationToken = destroyCancellationToken;
-            
+            _damage = damage;
+            _rateOfFire = rateOfFire;
+            _rechargeSpeed = rechargeSpeed;
+            _maxBulletsAmount = maxBulletsAmount;
+            _isMachineGun = isMachineGun;
+            _originRay = originRay;
+
             _currentBulletsAmount = _maxBulletsAmount;
             _time = _rateOfFire;
         }

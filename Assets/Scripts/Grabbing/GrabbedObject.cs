@@ -8,6 +8,8 @@ namespace Grabbing
         [Header("JointSettings")]
         [SerializeField] private float _jointForce = 1000;
         [SerializeField] private float _jointDamping = 10;
+
+        private bool _isObjectInTwoHands;
         
         private HandContact _leftHandContact, _rightHandContact;
         private ConfigurableJoint _leftHandConfigurableJoint, _rightHandConfigurableJoint;
@@ -57,5 +59,7 @@ namespace Grabbing
             };
             return drive;
         }
+        
+        public bool IsObjectInTwoHands() => _leftHandContact != null && _rightHandContact != null;
     }
 }

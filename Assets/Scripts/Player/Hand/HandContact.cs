@@ -5,39 +5,26 @@ using Object = UnityEngine.Object;
 
 namespace Player.Hand
 {
-    [Serializable]
     public class HandContact
     { 
-        [SerializeField] private bool _hasJoint;
+        private bool _hasJoint;
+        private readonly bool _isLeftHand;
         
-        private bool _isLeftHand;
-        
-        private ActiveRagdoll.ActiveRagdoll _activeRagdoll;
-        private InputSystem _inputSystem;
+        private readonly InputSystem _inputSystem;
         private GrabbedObject _grabbedObject;
         private FixedJoint _fixedJoint;
-        private Rigidbody _rigidbody;
+        private readonly ActiveRagdoll.ActiveRagdoll _activeRagdoll;
+        private readonly Rigidbody _rigidbody;
         
         public event Action ObjectPickedUp;
         public event Action ObjectDroppedOut;
 
-        public void Init(ActiveRagdoll.ActiveRagdoll activeRagdoll, Rigidbody rigidbody, bool isLeftHand)
+        public HandContact(ActiveRagdoll.ActiveRagdoll activeRagdoll, Rigidbody rigidbody, bool isLeftHand, InputSystem inputSystem)
         {
             _activeRagdoll = activeRagdoll;
             _rigidbody = rigidbody;
-            
             _isLeftHand = isLeftHand;
-        }
-        
-        public void OnEnable()
-        {
-            _inputSystem = new InputSystem();
-            _inputSystem.Player.Enable();
-        }
-
-        public void OnDisable()
-        {
-            _inputSystem.Player.Disable();
+            _inputSystem = inputSystem;
         }
         
         public void Update()
@@ -112,7 +99,8 @@ namespace Player.Hand
                 }
             }
         }
-
+        
+        public GrabbedObject GrabbedObject() => _grabbedObject;
         public Rigidbody GetRigidBody() => _rigidbody;
 
         public bool HasJoint() => _hasJoint;

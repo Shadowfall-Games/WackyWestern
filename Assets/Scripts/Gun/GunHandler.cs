@@ -1,18 +1,33 @@
 using Grabbing;
 using Player.Hand;
 using UnityEngine;
+using UnityEngine.VFX;
 
 namespace Gun
 {
     public class GunHandler : GrabbedObject
     {
-        [SerializeField] private Gun _gun;
-        [SerializeField] private GunView _gunView;
+        [Header("Raycast start point")]
+        [SerializeField] private Transform _originRay;
+        
+        [Header("Gun specs")]
+        [SerializeField] private int _damage = 1;
+        [SerializeField] private float _rateOfFire = 0.1f;
+        [SerializeField] private float _rechargeSpeed = 3;
+        [SerializeField] private int _maxBulletsAmount = 20;
+        [SerializeField] private bool _isMachineGun;
+        
+        [Header("Gun view")]
+        [SerializeField] private float _vfxDuration = 0.5f;
+        [SerializeField] private VisualEffect _impactExplosion;
+        
+        private Gun _gun; 
+        private GunView _gunView;
 
         private void Awake()
         {
-            _gun.Init(destroyCancellationToken);
-            _gunView.Init(_gun);
+            _gun = new Gun(destroyCancellationToken, _originRay, _damage, _rateOfFire, _rechargeSpeed, _maxBulletsAmount, _isMachineGun);
+            _gunView = new GunView(_gun, _vfxDuration, _impactExplosion);
         }
 
         private void OnEnable() => _gun.OnEnable();
