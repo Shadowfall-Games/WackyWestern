@@ -1,13 +1,15 @@
 using UnityEngine;
 
-public class FeetContact : MonoBehaviour
+namespace Player.Contacts
 {
-    [SerializeField] private ActiveRagdoll _ragdollController;
-
-    private void OnCollisionEnter(Collision col)
+    public class FeetContact : MonoBehaviour
     {
-        if (!_ragdollController.IsJumping() && _ragdollController.InAir())
+        [SerializeField] private ActiveRagdoll.ActiveRagdoll _ragdollController;
+
+        private void OnCollisionEnter(Collision col)
         {
+            if (_ragdollController.IsJumping() || !_ragdollController.InAir()) return;
+            
             if (col.gameObject.layer == LayerMask.NameToLayer("Ground"))
             {
                 _ragdollController.PlayerLanded();

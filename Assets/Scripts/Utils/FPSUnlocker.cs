@@ -1,12 +1,15 @@
 using UnityEngine;
 
-public class FPSUnlocker : MonoBehaviour
+namespace Utils
 {
-    [SerializeField] private int _targetFPS = 165;
-
-    private void Awake()
+    public class FPSUnlocker : MonoBehaviour
     {
-        QualitySettings.vSyncCount = 1;
-        Application.targetFrameRate = _targetFPS;
+        [SerializeField] private int _targetFPS = 165;
+
+        private void Awake()
+        {
+            QualitySettings.vSyncCount = 1;
+            Application.targetFrameRate = _targetFPS;
+        }
     }
 }
