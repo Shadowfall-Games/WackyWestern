@@ -46,8 +46,10 @@ namespace Player.ActiveRagdoll
 
         [Header("Reach Properties")]
         [SerializeField] private float _reachSensitivity = 100;
-        [SerializeField] private float _maxReachValue = 0.3f;
-        [SerializeField] private float _minReachValue = 0.6f;
+        [SerializeField] private float _maxPlayerReachValue = 0.3f;
+        [SerializeField] private float _minPlayerReachValue = 0.6f;
+        [SerializeField] private float _maxHandReachValue = 0.3f;
+        [SerializeField] private float _minHandReachValue = 0.6f;
         [SerializeField] private float _armReachStiffness = 700;
 
         [Header("Actions")]
@@ -460,29 +462,27 @@ namespace Player.ActiveRagdoll
         {
             if (true && _canRotate)
             {
-                if (_mouseYAxisBody <= _maxReachValue && _mouseYAxisBody >= -_minReachValue)
+                if (_mouseYAxisBody <= _maxPlayerReachValue && _mouseYAxisBody >= -_minPlayerReachValue)
                 {
                     _mouseYAxisBody = _mouseYAxisBody + (_inputSystem.Player.Look.ReadValue<Vector2>().y / _reachSensitivity);
                 }
 
-                else if (_mouseYAxisBody > -_maxReachValue)
+                else if (_mouseYAxisBody > -_maxPlayerReachValue)
                 {
-                    _mouseYAxisBody = _maxReachValue;
+                    _mouseYAxisBody = _maxPlayerReachValue;
                 }
 
-                else if (_mouseYAxisBody < -_minReachValue)
+                else if (_mouseYAxisBody < -_minPlayerReachValue)
                 {
-                    _mouseYAxisBody = -_minReachValue;
+                    _mouseYAxisBody = -_minPlayerReachValue;
                 }
 
                 _playerParts[1].GetComponent<ConfigurableJoint>().targetRotation = new Quaternion(_mouseYAxisBody, 0, 0, 1);
             }
 
-
             //Reach Left
             if (_inputSystem.Player.ReachLeft.IsPressed() && !_punchingLeft)
             {
-
                 if (!_reachLeftAxisUsed)
                 {
                     //Adjust Left Arm joint strength
@@ -495,19 +495,19 @@ namespace Player.ActiveRagdoll
                     _reachLeftAxisUsed = true;
                 }
 
-                if (_mouseYAxisArms <= 1.2f && _mouseYAxisArms >= -1.2f)
+                if (_mouseYAxisArms <= _maxHandReachValue &&  _mouseYAxisArms >= -_minHandReachValue)
                 {
                     _mouseYAxisArms = _mouseYAxisArms + (_inputSystem.Player.Look.ReadValue<Vector2>().y / _reachSensitivity);
                 }
 
-                else if (_mouseYAxisArms > 1.2f)
+                else if (_mouseYAxisArms > _maxHandReachValue)
                 {
-                    _mouseYAxisArms = 1.2f;
+                    _mouseYAxisArms = _maxHandReachValue;
                 }
 
-                else if (_mouseYAxisArms < -1.2f)
+                else if (_mouseYAxisArms < -_minHandReachValue)
                 {
-                    _mouseYAxisArms = -1.2f;
+                    _mouseYAxisArms = -_minHandReachValue;
                 }
 
                 //upper  left arm pose
@@ -525,8 +525,7 @@ namespace Player.ActiveRagdoll
                         _playerParts[1].GetComponent<ConfigurableJoint>().angularXDrive = _poseOn;
                         _playerParts[1].GetComponent<ConfigurableJoint>().angularYZDrive = _poseOn;
                     }
-
-                    else if (!_balanced)
+                    else
                     {
                         SetDrives(_driveOff, 5, 6);
                     }
@@ -535,9 +534,6 @@ namespace Player.ActiveRagdoll
                     _reachLeftAxisUsed = false;
                 }
             }
-
-
-
 
             //Reach Right
             if (_inputSystem.Player.ReachRight.IsPressed() && !_punchingRight)
@@ -555,44 +551,47 @@ namespace Player.ActiveRagdoll
                     _reachRightAxisUsed = true;
                 }
 
-                if (_mouseYAxisArms is <= 1.2f and >= -1.2f)
+                if (_mouseYAxisArms <= _maxHandReachValue && _mouseYAxisArms >= -_minHandReachValue)
                 {
-                    _mouseYAxisArms += (_inputSystem.Player.Look.ReadValue<Vector2>().y / _reachSensitivity);
+                    _mouseYAxisArms = _mouseYAxisArms + (_inputSystem.Player.Look.ReadValue<Vector2>().y / _reachSensitivity);
                 }
 
-                else if (_mouseYAxisArms > 1.2f)
+                else if (_mouseYAxisArms > _maxHandReachValue)
                 {
-                    _mouseYAxisArms = 1.2f;
+                    _mouseYAxisArms = _maxHandReachValue;
                 }
 
-                else if (_mouseYAxisArms < -1.2f)
+                else if (_mouseYAxisArms < -_minHandReachValue)
                 {
-                    _mouseYAxisArms = -1.2f;
+                    _mouseYAxisArms = -_minHandReachValue;
                 }
 
                 //upper right arm pose
                 _playerParts[3].GetComponent<ConfigurableJoint>().targetRotation = new Quaternion(0.58f + (_mouseYAxisArms), 0.88f + (_mouseYAxisArms), -0.8f, 1);
             }
-
-            if (_inputSystem.Player.ReachRight.IsPressed() || _punchingRight || !_reachRightAxisUsed) return;
-        
-            if (_balanced)
+            
+            if (!_inputSystem.Player.ReachRight.IsPressed() && !_punchingRight)
             {
-                SetDrives(_poseOn, 3, 4);
+                if (_reachRightAxisUsed)
+                {
+                    if (_balanced)
+                    {
+                        SetDrives(_poseOn, 3, 4);
 
-                _playerParts[1].GetComponent<ConfigurableJoint>().angularXDrive = _poseOn;
-                _playerParts[1].GetComponent<ConfigurableJoint>().angularYZDrive = _poseOn;
+                        _playerParts[1].GetComponent<ConfigurableJoint>().angularXDrive = _poseOn;
+                        _playerParts[1].GetComponent<ConfigurableJoint>().angularYZDrive = _poseOn;
+                    }
+                    else
+                    {
+                        SetDrives(_driveOff, 3, 4);
+                    }
+
+                    _resetPose = true;
+                    _reachRightAxisUsed = false;
+                }
             }
-
-            else if (!_balanced)
-            {
-                SetDrives(_driveOff, 3, 4);
-            }
-
-            _resetPose = true;
-            _reachRightAxisUsed = false;
-
         }
+        
 
         private void PlayerPunch()
         {
@@ -841,7 +840,7 @@ namespace Player.ActiveRagdoll
             SetDrives(_driveOff, 7, 12);
         }
 
-        public void DeactivateRagdoll()
+        private void DeactivateRagdoll()
         {
             _isRagdoll = false;
             _balanced = true;

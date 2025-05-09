@@ -60,7 +60,7 @@ namespace Player.Hand
         {
             var hasComponent = collision.gameObject.TryGetComponent(out GrabbedObject grabbedObject);
 
-            if (collision.gameObject.layer != _activeRagdoll.ThisPlayerLayer() && !_hasJoint && reachIsPressed && !punchIsPressed)
+            if (((1<<collision.gameObject.layer) & _activeRagdoll.ThisPlayerLayer()) ==  0 && !_hasJoint && reachIsPressed && !punchIsPressed)
             {
                 _hasJoint = true;
                 if (hasComponent)
