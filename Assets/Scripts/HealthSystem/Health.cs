@@ -11,7 +11,7 @@ namespace HealthSystem
 
         public event Action<int> Recovered;
         public event Action<int> Damaged;
-        public event Action Died;
+        public event Action<Vector3> Died;
         public event Action OnRevival;
 
         private void Start()
@@ -20,7 +20,7 @@ namespace HealthSystem
             _isDied = false;
         }
 
-        public void ApplyDamage(int damage)
+        public void ApplyDamage(int damage, Vector3 hitPoint)
         {
             if (_isDied) return;
             
@@ -30,9 +30,9 @@ namespace HealthSystem
             
             if (_currentHealth > 0) return;
             
-            Died?.Invoke();
+            Died?.Invoke(hitPoint);
             _isDied = true;
-            Debug.Log("Died");
+            Debug.Log(this + " Died");
         }
 
         public void Recovery(int health)

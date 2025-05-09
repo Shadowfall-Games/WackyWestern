@@ -66,10 +66,10 @@ namespace Gun
 
         protected virtual void Shoot()
         {
-            if (Physics.Raycast(_originRay.position, _originRay.forward, out RaycastHit hit))
+            if (Physics.Raycast(_originRay.position, _originRay.forward, out var hit))
             {
                 var healthSystem = hit.collider.GetComponentInParent<IHealthSystem>();
-                if (healthSystem != null) healthSystem.ApplyDamage(_damage);
+                healthSystem?.ApplyDamage(_damage, hit.point);
                 OnHit?.Invoke(hit.point);
             }
             

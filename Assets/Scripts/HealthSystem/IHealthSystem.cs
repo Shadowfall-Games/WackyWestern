@@ -1,4 +1,5 @@
 using System;
+using UnityEngine;
 
 namespace HealthSystem
 {
@@ -6,10 +7,10 @@ namespace HealthSystem
     {
         event Action<int> Recovered;
         event Action<int> Damaged;
-        event Action Died;
+        event Action<Vector3> Died;
         event Action OnRevival;
         
-        void ApplyDamage(int damage);
+        void ApplyDamage(int damage, Vector3 hitPoint);
 
         void Recovery(int health);
 

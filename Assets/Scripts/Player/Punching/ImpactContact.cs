@@ -2,9 +2,12 @@
 
 namespace Player.Punching
 {
+    [RequireComponent(typeof(ActiveRagdoll.ActiveRagdoll))]
     public class ImpactContact : MonoBehaviour
     {
-        [SerializeField] private ActiveRagdoll.ActiveRagdoll _activeRagdoll;
+        private ActiveRagdoll.ActiveRagdoll _activeRagdoll;
+        
+        private void Start() => _activeRagdoll = GetComponent<ActiveRagdoll.ActiveRagdoll>();
 
         private void OnCollisionEnter(Collision col)
         {

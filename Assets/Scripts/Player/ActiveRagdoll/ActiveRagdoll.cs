@@ -841,7 +841,7 @@ namespace Player.ActiveRagdoll
             SetDrives(_driveOff, 7, 12);
         }
 
-        private void DeactivateRagdoll()
+        public void DeactivateRagdoll()
         {
             _isRagdoll = false;
             _balanced = true;
@@ -899,6 +899,8 @@ namespace Player.ActiveRagdoll
         }
 
         public void SetCanRotate(bool value) => _canRotate = value;
+
+        public GameObject Root => _root;
         public LayerMask ThisPlayerLayer() => _thisPlayerLayer;
         public float RequiredForceToBeKo() => _requiredForceToBeKo;
         public bool CanRotate() => _canRotate;
@@ -913,15 +915,14 @@ namespace Player.ActiveRagdoll
 
         private void OnDrawGizmos()
         {
-            if (_editorDebugMode)
-            {
-                Debug.DrawRay(_root.transform.position, -_root.transform.up * _balanceHeight, Color.green);
+            if (!_editorDebugMode) return;
+            
+            Debug.DrawRay(_root.transform.position, -_root.transform.up * _balanceHeight, Color.green);
 
-                if (_useStepPrediction)
-                {
-                    Gizmos.color = Color.yellow;
-                    Gizmos.DrawWireSphere(_centerOfMass.position, 0.3f);
-                }
+            if (_useStepPrediction)
+            {
+                Gizmos.color = Color.yellow;
+                Gizmos.DrawWireSphere(_centerOfMass.position, 0.3f);
             }
         }
     }

@@ -24,11 +24,12 @@ namespace Gun
         {
             _gun.OnHit -= SpawnVFX;
         }
+        
         private void SpawnVFX(Vector3 position)
         {
             var vfxInstance = Object.Instantiate(_impactExplosion, position, Quaternion.identity);
 
-            VisualEffect vfx = vfxInstance.GetComponent<VisualEffect>();
+            var vfx = vfxInstance.GetComponent<VisualEffect>();
             Object.Destroy(vfxInstance.gameObject, _vfxDuration);
         }
     }

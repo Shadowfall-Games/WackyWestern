@@ -59,8 +59,8 @@ namespace Player.Hand
         private void GrabItem(Collision collision, GameObject gameObject, bool reachIsPressed, bool punchIsPressed)
         {
             var hasComponent = collision.gameObject.TryGetComponent(out GrabbedObject grabbedObject);
-            
-            if (collision.gameObject.layer != ~_activeRagdoll.ThisPlayerLayer() && !_hasJoint && reachIsPressed && !punchIsPressed)
+
+            if (collision.gameObject.layer != _activeRagdoll.ThisPlayerLayer() && !_hasJoint && reachIsPressed && !punchIsPressed)
             {
                 _hasJoint = true;
                 if (hasComponent)
