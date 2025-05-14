@@ -1,11 +1,13 @@
 using System.Collections.Generic;
 using HealthSystem;
+using Item.ExplosiveObject.Dynamite;
+using Item.ExplosiveObject.ExplosiveBarrel;
 using Player.ActiveRagdoll;
 using UnityEngine;
 
-namespace Prop.ExplosiveBarrel
+namespace Item.ExplosiveObject
 {
-    public class ExplosiveBarrelExploder
+    public class ExplosiveObjectExploder
     {
         private readonly int _explosionDamage;
         private readonly float _forceRadius;
@@ -14,7 +16,7 @@ namespace Prop.ExplosiveBarrel
         private readonly float _objectsExplosionForce;
         private readonly float _upwardsForce;
 
-        public ExplosiveBarrelExploder(int explosionDamage,float forceRadius, float deadlyRadius,float explodeForce, float objectsExplosionForce, float upwardsForce)
+        public ExplosiveObjectExploder(int explosionDamage,float forceRadius, float deadlyRadius,float explodeForce, float objectsExplosionForce, float upwardsForce)
         {
             _explosionDamage = explosionDamage;
             _forceRadius = forceRadius;
@@ -34,13 +36,13 @@ namespace Prop.ExplosiveBarrel
             {
                 var distance = Vector3.Distance(explosionPosition, hitCollider.transform.position);
                 
-                var explosiveBarrelHandler = hitCollider.GetComponentInParent<ExplosiveBarrelHandler>();
+                var explosiveObject = hitCollider.GetComponentInParent<ExplosiveObject>();
                 
-                if (explosiveBarrelHandler)
+                if (explosiveObject)
                 {
                     if (distance <= _forceRadius)
                     {
-                        explosiveBarrelHandler.Explode(explosiveBarrelHandler.transform.position);
+                        explosiveObject?.Explode(explosiveObject.transform.position);
                     }
                 }
 
@@ -70,7 +72,7 @@ namespace Prop.ExplosiveBarrel
                     var rigidBody = hitCollider.GetComponentInParent<Rigidbody>();
                     var configurableJoint = hitCollider.GetComponentInParent<ConfigurableJoint>();
 
-                    if (rigidBody && !configurableJoint && !explosiveBarrelHandler)
+                    if (rigidBody && !configurableJoint && !explosiveObject)
                             if (distance <= _forceRadius)
                                 rigidBody.AddExplosionForce(_objectsExplosionForce, explosionPosition, _forceRadius,
                                     _upwardsForce, ForceMode.Impulse);

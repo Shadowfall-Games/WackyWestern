@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEngine.Serialization;
+using Zenject;
 
 namespace Player.ActiveRagdoll
 {
@@ -14,9 +15,9 @@ namespace Player.ActiveRagdoll
         [SerializeField] private SkinnedMeshRenderer _playerModel;
 
         [Header("Follow Properties")]
-        [SerializeField] private float _distance = 6;
-        [SerializeField] private float _distanceOffset = 0.11f;
-        [SerializeField] private float _distanceToFade = 3;
+        [SerializeField] private float _distance = 8;
+        [SerializeField] private float _distanceOffset = 0.1f;
+        [SerializeField] private float _distanceToFade = 5;
         [SerializeField] private float _smoothness = 0.07f;
 
         [Header("Sensitivity")]
@@ -25,25 +26,22 @@ namespace Player.ActiveRagdoll
         [SerializeField] private float _sensitivityMultiplayer = 0.1f;
 
         [Header("Rotation Angles")]
-        [SerializeField] private float _minAngle = -65;
+        [SerializeField] private float _minAngle = -60;
         [SerializeField] private float _maxAngle = 20;
 
         [Header("Camera Collision")]
         [SerializeField] private LayerMask _ignoreLayer;
 
         private Camera _camera;
-        private float _currentX;
-        private float _currentY;
-        private Quaternion _rotation;
-        private Vector3 _direction;
+        public float _currentX;
+        public float _currentY;
+        public Quaternion _rotation;
+        public Vector3 _direction;
 
         private InputSystem _inputSystem;
 
-        private void OnEnable()
-        {
-            _inputSystem = new InputSystem();
-            _inputSystem.Player.Enable();
-        }
+        [Inject]
+        private void Construct(InputSystem inputSystem) =>  _inputSystem = inputSystem;
 
         private void OnDisable()
         {
@@ -60,6 +58,8 @@ namespace Player.ActiveRagdoll
 
         private void Update()
         {
+            if (!_canRotate) return;
+            
             _currentX += _inputSystem.Player.Look.ReadValue<Vector2>().x * _sensitivityX * _sensitivityMultiplayer;
             _currentY += _inputSystem.Player.Look.ReadValue<Vector2>().y * _sensitivityY * _sensitivityMultiplayer;
 

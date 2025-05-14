@@ -1,7 +1,9 @@
 using Grabbing;
 using Player.Hand;
 using UnityEngine;
+using UnityEngine.InputSystem;
 using UnityEngine.VFX;
+using Zenject;
 
 namespace Gun
 {
@@ -21,12 +23,17 @@ namespace Gun
         [SerializeField] private float _vfxDuration = 0.5f;
         [SerializeField] private VisualEffect _impactExplosion;
         
+        private InputSystem _inputSystem;
+        
         private Gun _gun; 
         private GunView _gunView;
 
+        [Inject]
+        private void Construct(InputSystem inputSystem) =>  _inputSystem = inputSystem;
+
         private void Awake()
         {
-            _gun = new Gun(destroyCancellationToken, _originRay, _damage, _rateOfFire, _rechargeSpeed, _maxBulletsAmount, _isMachineGun);
+            _gun = new Gun(_inputSystem, destroyCancellationToken, _originRay, _damage, _rateOfFire, _rechargeSpeed, _maxBulletsAmount, _isMachineGun);
             _gunView = new GunView(_gun, _vfxDuration, _impactExplosion);
         }
 
@@ -37,7 +44,11 @@ namespace Gun
             _gun.OnDisable();
         }
 
-        private void OnDestroy() => _gunView.OnDestroy();
+        private void OnDestroy()
+        {
+            _gun.OnDestroy();
+            _gunView.OnDestroy();
+        }
 
         private void Update()
         {

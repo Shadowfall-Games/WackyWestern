@@ -1,6 +1,7 @@
 using Grabbing;
 using Player.ActiveRagdoll;
 using UnityEngine;
+using Zenject;
 
 namespace Player.Hand
 {
@@ -21,15 +22,14 @@ namespace Player.Hand
         private GrabbedObject _grabbedObject;
         private InputSystem _inputSystem;
         
+        [Inject]
+        private void Construct(InputSystem inputSystem) =>  _inputSystem = inputSystem;
         
         private void Start()
         {
             _activeRagdoll = FindAnyObjectByType<ActiveRagdoll.ActiveRagdoll>();
             _configurableJoint = GetComponent<ConfigurableJoint>();
             _rigidbody = GetComponent<Rigidbody>();
-            
-            _inputSystem = new InputSystem();
-            _inputSystem.Enable();
             
             if (Camera.main != null) _cameraController = Camera.main.GetComponent<CameraController>();
             
@@ -42,6 +42,7 @@ namespace Player.Hand
         private void OnDestroy()
         {
             _handRotation.OnDestroy();
+            _inputSystem.Disable();
         }
 
         private void Update()

@@ -1,6 +1,7 @@
 using System.Collections;
 using UnityEngine;
 using UnityEngine.Serialization;
+using Zenject;
 
 namespace Player.ActiveRagdoll
 {
@@ -95,12 +96,9 @@ namespace Player.ActiveRagdoll
 
         [Header("Player Editor Debug Mode")]
         [SerializeField] private bool _editorDebugMode;
-
-        private void OnEnable()
-        {
-            _inputSystem = new InputSystem();
-            _inputSystem.Player.Enable();
-        }
+        
+        [Inject]
+        private void Construct(InputSystem inputSystem) =>  _inputSystem = inputSystem;
 
         private void OnDisable()
         {

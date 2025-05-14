@@ -1,3 +1,4 @@
+using System;
 using Player.Hand;
 using UnityEngine;
 
@@ -7,12 +8,15 @@ namespace Grabbing
     {
         [Header("JointSettings")]
         [SerializeField] private float _jointForce = 1000;
-        [SerializeField] private float _jointDamping = 10;
+        [SerializeField] private float _jointDamping = 50;
 
         private bool _isObjectInTwoHands;
         
         private HandContact _leftHandContact, _rightHandContact;
         private ConfigurableJoint _leftHandConfigurableJoint, _rightHandConfigurableJoint;
+        
+        public event Action OnGrab;
+        public event Action OnDrop;
         
         public virtual void Grab(HandContact handContact, bool isLeftHand)
         {
@@ -31,12 +35,16 @@ namespace Grabbing
                 _rightHandConfigurableJoint.connectedBody = _rightHandContact.GetRigidBody();
                 ConfigurateJoint(_rightHandConfigurableJoint, ConfigurableJointMotion.Locked);
             }
+            
+            OnGrab?.Invoke();
         }
 
         public virtual void Drop()
         {
             if (_leftHandContact != null && !_leftHandContact.HasJoint()) { _leftHandContact = null; Destroy(_leftHandConfigurableJoint); }
             if (_rightHandContact != null && !_rightHandContact.HasJoint()) { _rightHandContact = null; Destroy(_rightHandConfigurableJoint); }
+            
+            OnDrop?.Invoke();
         }
         
         private void ConfigurateJoint(ConfigurableJoint configurableJoint, ConfigurableJointMotion motion)

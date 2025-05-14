@@ -72,7 +72,7 @@ namespace Player.Hand
                     }
                 }
             }
-            else if (!_cameraController.CanRotate() && !_activeRagdoll.CanRotate())
+            else if (!_cameraController.CanRotate() || !_activeRagdoll.CanRotate())
             {
                 _activeRagdoll.SetCanRotate(true);
                 _cameraController.SetCanRotate(true);

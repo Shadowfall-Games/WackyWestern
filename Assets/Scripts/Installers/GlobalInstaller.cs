@@ -7,7 +7,5 @@ public class GlobalInstaller :  MonoInstaller
         InputSystem inputSystem = new InputSystem();
         inputSystem.Enable();
         Container.Bind<InputSystem>().FromInstance(inputSystem);
-
-
     }
 }

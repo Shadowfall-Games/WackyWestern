@@ -27,11 +27,12 @@ namespace Gun
 
         public void OnEnable() =>  _inputSystem.Gun.Recharge.performed += Recharge;
         public void OnDisable() => _inputSystem.Gun.Recharge.performed -= Recharge;
+        
+        public void OnDestroy() => _inputSystem.Gun.Disable();
 
-        public Gun(CancellationToken destroyCancellationToken, Transform originRay, int damage, float rateOfFire, float rechargeSpeed, int maxBulletsAmount, bool isMachineGun)
+        public Gun(InputSystem inputSystem, CancellationToken destroyCancellationToken, Transform originRay, int damage, float rateOfFire, float rechargeSpeed, int maxBulletsAmount, bool isMachineGun)
         {
-            _inputSystem = new InputSystem();
-            _inputSystem.Gun.Enable();
+            _inputSystem = inputSystem;
             
             _destroyCancellationToken = destroyCancellationToken;
             _damage = damage;
@@ -47,8 +48,6 @@ namespace Gun
 
         public void Update()
         {
-            Debug.DrawRay(_originRay.position, _originRay.forward, Color.blue);
-
             if (!_canShoot) return;
             
             _time += Time.deltaTime;
@@ -84,7 +83,15 @@ namespace Gun
         {
             OnRecharged?.Invoke();
 
-            await Awaitable.WaitForSecondsAsync(_rechargeSpeed, _destroyCancellationToken);
+            try
+            {
+                await Awaitable.WaitForSecondsAsync(_rechargeSpeed, _destroyCancellationToken);
+            }
+            catch
+            {
+                return;
+                
+            }
             
             _canShoot = false;
             _canShoot = true;

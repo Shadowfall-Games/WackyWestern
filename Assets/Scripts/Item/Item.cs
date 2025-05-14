@@ -1,8 +1,6 @@
 using Grabbing;
-using Player.Contacts;
-using UnityEngine;
 
-namespace Prop
+namespace Item
 {
     public class Prop : GrabbedObject
     {
