@@ -1,7 +1,6 @@
 using Grabbing;
 using Player.Hand;
 using UnityEngine;
-using UnityEngine.InputSystem;
 using UnityEngine.VFX;
 using Zenject;
 

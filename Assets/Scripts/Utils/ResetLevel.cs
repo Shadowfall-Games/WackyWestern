@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using Zenject;
 
 namespace Utils
 {
@@ -7,11 +8,8 @@ namespace Utils
     {
         private InputSystem _inputSystem;
 
-        private void OnEnable()
-        {
-            _inputSystem = new InputSystem();
-            _inputSystem.Player.Enable();
-        }
+        [Inject]
+        private void Construct(InputSystem inputSystem) =>  _inputSystem = inputSystem;
 
         private void Update()
         {

@@ -33,17 +33,17 @@ namespace Player.ActiveRagdoll
         [SerializeField] private LayerMask _ignoreLayer;
 
         private Camera _camera;
-        public float _currentX;
-        public float _currentY;
-        public Quaternion _rotation;
-        public Vector3 _direction;
+        private float _currentX;
+        private float _currentY;
+        private Quaternion _rotation;
+        private Vector3 _direction;
 
         private InputSystem _inputSystem;
 
         [Inject]
         private void Construct(InputSystem inputSystem) =>  _inputSystem = inputSystem;
 
-        private void OnDisable()
+        private void OnDestroy()
         {
             _inputSystem.Player.Disable();
         }

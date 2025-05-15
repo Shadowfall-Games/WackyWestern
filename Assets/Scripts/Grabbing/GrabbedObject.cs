@@ -21,21 +21,13 @@ namespace Grabbing
         public virtual void Grab(HandContact handContact, bool isLeftHand)
         {
             if (isLeftHand) _leftHandContact = handContact;
-            else _rightHandContact = handContact; 
-            
+            else _rightHandContact = handContact;
+
             if (isLeftHand)
-            {
-                _leftHandConfigurableJoint = gameObject.AddComponent<ConfigurableJoint>();
-                _leftHandConfigurableJoint.connectedBody = _leftHandContact.GetRigidBody();
-                ConfigurateJoint(_leftHandConfigurableJoint, ConfigurableJointMotion.Locked);
-            }
+                ConfigurateJoint(out _leftHandConfigurableJoint, ConfigurableJointMotion.Locked, _leftHandContact);
             else
-            {
-                _rightHandConfigurableJoint = gameObject.AddComponent<ConfigurableJoint>();
-                _rightHandConfigurableJoint.connectedBody = _rightHandContact.GetRigidBody();
-                ConfigurateJoint(_rightHandConfigurableJoint, ConfigurableJointMotion.Locked);
-            }
-            
+                ConfigurateJoint(out _rightHandConfigurableJoint, ConfigurableJointMotion.Locked, _rightHandContact);
+
             OnGrab?.Invoke();
         }
 
@@ -47,8 +39,10 @@ namespace Grabbing
             OnDrop?.Invoke();
         }
         
-        private void ConfigurateJoint(ConfigurableJoint configurableJoint, ConfigurableJointMotion motion)
+        private void ConfigurateJoint(out ConfigurableJoint configurableJoint, ConfigurableJointMotion motion, HandContact handContact)
         {
+            configurableJoint = gameObject.AddComponent<ConfigurableJoint>();
+            configurableJoint.connectedBody = handContact.GetRigidBody();
             configurableJoint.xMotion = motion;
             configurableJoint.yMotion = motion;
             configurableJoint.zMotion = motion;
